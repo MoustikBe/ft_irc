@@ -45,7 +45,7 @@ int main(int argc, char** argv)
         if(strncmp(buffer, "time", 4) == 0)
             send(clientSocket, timeInfo.c_str(), timeInfo.size(), 0); 
         if(strncmp(buffer, "NICK", 4) == 0)
-            usr1.setUserName(buffer); /* Du coup c'est comme ca qu'on gere le user */
+            usr1.setUserName(buffer); /* Du coup c'est comme ca qu'on gere les user*/
         for(int i = 0; buffer[i]; i++)
             std::cout << buffer[i] << "";
     }
