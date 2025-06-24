@@ -31,17 +31,16 @@ int main(int argc, char** argv)
     bind(serverSocket, (struct sockaddr*)&address, sizeof(address));
     listen(serverSocket, 10);                                                                                                                                                                                                                                                                                                                                                                           
     int clientSocket = accept(serverSocket, NULL, NULL);
-    std::string welcome = "[CONNECTED to ft_IRCS] | Welcome !\n";
+    std::string welcome = "001\r\n";
     send(clientSocket, welcome.c_str(), welcome.size(), 0);
     char *buffer; 
     buffer = new char[1000];
-    while(buffer)
+    buffer[0] = ' ';
+    while(buffer[0])
     {
-        //delete buffer;
         buffer = new char[1000];
         recv(clientSocket, buffer, sizeof(buffer), 0);
         std::cout <<  ">" << buffer << "\n";
-        delete buffer;
     }
     close(serverSocket);
     return(0);
