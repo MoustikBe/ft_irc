@@ -32,16 +32,22 @@ int main(int argc, char** argv)
     listen(serverSocket, 10);                                                                                                                                                                                                                                                                                                                                                                           
     int clientSocket = accept(serverSocket, NULL, NULL);
     std::string welcome = "001\r\n";
+    std::string timeInfo = "TIME : \r\n";
     send(clientSocket, welcome.c_str(), welcome.size(), 0);
-    char *buffer; 
-    buffer = new char[1000];
-    buffer[0] = ' ';
-    while(buffer[0])
+    
+    /* Data echange beetwen client <-> server */
+    char *buffer;
+    while(strncmp(buffer, "QUIT", 4))
     {
         buffer = new char[1000];
         recv(clientSocket, buffer, sizeof(buffer), 0);
-        std::cout <<  ">" << buffer << "\n";
+        if(strncmp(buffer, "time", 4) == 0)
+            send(clientSocket, timeInfo.c_str(), timeInfo.size(), 0); 
+        for(int i = 0; buffer[i]; i++)
+            std::cout << buffer[i] << "";
     }
+    /* Data echange beetwen client <-> server */
+    
     close(serverSocket);
     return(0);
 }
