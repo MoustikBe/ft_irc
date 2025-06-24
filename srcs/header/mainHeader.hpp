@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "server.hpp"
+#include "user.hpp"
 
 
 #endif

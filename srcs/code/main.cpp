@@ -23,6 +23,7 @@ int main(int argc, char** argv)
     else if(!VerifArguments(argv))
         return(1);
     Server srv(atoi(argv[1]));
+    User usr1;
     sockaddr_in address;
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     address.sin_family = AF_INET;
@@ -43,11 +44,13 @@ int main(int argc, char** argv)
         recv(clientSocket, buffer, sizeof(buffer), 0);
         if(strncmp(buffer, "time", 4) == 0)
             send(clientSocket, timeInfo.c_str(), timeInfo.size(), 0); 
+        if(strncmp(buffer, "NICK", 4) == 0)
+            usr1.setUserName(buffer); /* Du coup c'est comme ca qu'on gere le user */
         for(int i = 0; buffer[i]; i++)
             std::cout << buffer[i] << "";
     }
     /* Data echange beetwen client <-> server */
-    
+    std::cout << usr1.getUserName() << "\n";
     close(serverSocket);
     return(0);
 }
