@@ -18,5 +18,10 @@
 #include "server.hpp"
 #include "user.hpp"
 
+/* Server */
+void ServerInit(char **argv);
+
+/* Main */
+void error(std::string ErrorMsg);
 
 #endif
