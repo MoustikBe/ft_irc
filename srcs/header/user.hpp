@@ -6,14 +6,11 @@
 class User
 {
 private:
-    std::string _UserName;
+    std::vector<std::string> _user;
 
 public:
     User(){};
-    User(std::string UserName) : _UserName(UserName){};
     ~User(){};
-    inline std::string getUserName() {return(_UserName);};
-    inline void setUserName(std::string UserName) {_UserName = UserName;};
 };
 
 #endif
