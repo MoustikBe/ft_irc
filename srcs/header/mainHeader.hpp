@@ -1,20 +1,23 @@
 #ifndef MAIN_HEADER_HPP
 # define MAIN_HEADER_HPP
 
-#include <iostream>
+/* CPP */
+#include <map>
 #include <vector>
+#include <iostream>
 #include <algorithm>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
+/* C */
 #include <poll.h>
 #include <errno.h>
-
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+/* My_files */
 #include "server.hpp"
 #include "user.hpp"
 

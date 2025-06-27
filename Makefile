@@ -3,7 +3,7 @@ C+	    = c++
 CFLAG   = -Wall -Werror -Wextra -std=c++98 -g3
 RM      = rm -rf
 OBJDIR  = obj
-SOURCES = srcs/code/main.cpp srcs/code/server/serverMain.cpp
+SOURCES = srcs/code/main.cpp srcs/code/server/serverMain.cpp srcs/code/user/user.cpp
 
 OBJECTS = $(SOURCES:%.cpp=$(OBJDIR)/%.o)
 

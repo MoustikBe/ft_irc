@@ -1,17 +1,20 @@
 #include "../../header/mainHeader.hpp"
 
-void ServerNewConnection(int serverSocket, std::string welcome, std::vector<pollfd> *fdPoll, int *id, User Users)
+void ServerNewConnection(int serverSocket, std::string welcome, std::vector<pollfd> *fdPoll, int *id, User *Users)
 {
     int clientFd = accept(serverSocket, NULL, NULL);
     std::cout << "Nouvelle connection\n";
     
-    Users._user
+    Users->setSocket(clientFd);
+    Users->setUsername("Default", clientFd);
     send(clientFd, welcome.c_str(), welcome.size(), 0);
     pollfd newClient = {clientFd, POLLIN, 0};
     fdPoll->push_back(newClient);
+    (*id)++;
+    Users->getAllDataUser();
 }
 
-void ServerRequest(std::vector<pollfd> &fdPoll, int *i, std::string timeInfo)
+void ServerRequest(std::vector<pollfd> &fdPoll, int *i, std::string timeInfo, User *Users)
 {   
     char buffer[1000]= {0};
     int bytes = recv(fdPoll[*i].fd, buffer, sizeof(buffer), 0);
@@ -20,21 +23,21 @@ void ServerRequest(std::vector<pollfd> &fdPoll, int *i, std::string timeInfo)
     if(ServerMsg.substr(0, 4) == "time")
         send(fdPoll[*i].fd, timeInfo.c_str(), timeInfo.size(), 0); 
     else if(ServerMsg.substr(0, 4) == "NICK")
-        std::cout << "NickName scenario";
+        Users->setUsername(ServerMsg, fdPoll[*i].fd);
     else if(ServerMsg.substr(0, 4) == "QUIT" || !bytes)
     {
         close(fdPoll[*i].fd);
         fdPoll.erase(fdPoll.begin() + *i);
         std::cout << "Connection stopped\n";    
         (*i)--;
-    }
-    std::cout << ServerMsg;   
+    }   
+    std::cout << ServerMsg;
 }
 
 void ServerExchange(int serverSocket, std::string welcome, std::string timeInfo)
 {
     int id = 0;
-    User user();
+    User Users;
     std::vector<pollfd> fdPoll;
     pollfd serverPollFd = {serverSocket, POLLIN, 0};
 
@@ -52,9 +55,9 @@ void ServerExchange(int serverSocket, std::string welcome, std::string timeInfo)
             if(fdPoll[i].revents & POLLIN)
             {
                 if(fdPoll[i].fd == serverSocket)
-                    ServerNewConnection(serverSocket, welcome, &fdPoll, &id);
+                    ServerNewConnection(serverSocket, welcome, &fdPoll, &id, &Users);
                 else
-                    ServerRequest(fdPoll, &i, timeInfo);
+                    ServerRequest(fdPoll, &i, timeInfo, &Users);
             }
         }
 

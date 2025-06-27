@@ -3,15 +3,25 @@
 
 #include <iostream>
 
+struct userData
+{
+    std::string name;
+    std::string chanel;
+    int         socketUser;
+    bool        online;
+};
+
 class User
 {
 private:
-    std::vector<std::string> _user;
+    std::map<int, userData> _user;
 
 public:
     User(){};
     ~User(){};
-    inline void setUsername(std::string username, int it) {_user[it] = username;};
+    void setUsername(std::string name, int id);
+    void setSocket(int fd);
+    void getAllDataUser();
 };
 
 #endif
