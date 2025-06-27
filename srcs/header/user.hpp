@@ -11,6 +11,7 @@ private:
 public:
     User(){};
     ~User(){};
+    inline void setUsername(std::string username, int it) {_user[it] = username;};
 };
 
 #endif

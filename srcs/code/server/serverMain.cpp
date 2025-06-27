@@ -1,10 +1,11 @@
 #include "../../header/mainHeader.hpp"
 
-void ServerNewConnection(int serverSocket, std::string welcome, std::vector<pollfd> *fdPoll, int *id)
+void ServerNewConnection(int serverSocket, std::string welcome, std::vector<pollfd> *fdPoll, int *id, User Users)
 {
     int clientFd = accept(serverSocket, NULL, NULL);
     std::cout << "Nouvelle connection\n";
     
+    Users._user
     send(clientFd, welcome.c_str(), welcome.size(), 0);
     pollfd newClient = {clientFd, POLLIN, 0};
     fdPoll->push_back(newClient);
