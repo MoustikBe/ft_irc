@@ -17,6 +17,5 @@ void User::getAllDataUser()
     {
         if(_user[i].name != "")
             std::cout << _user[i].name << "\n";
-
     }
 }

@@ -14,6 +14,14 @@ void ServerNewConnection(int serverSocket, std::string welcome, std::vector<poll
     Users->getAllDataUser();
 }
 
+void requestChangeName(int fd, std::string ServerMsg, User *Users)
+{
+    // Need to clean the Server Message to extract only the name before changing it //
+    std::string newName;
+    Users->setUsername(ServerMsg, fd);
+}
+
+
 void ServerRequest(std::vector<pollfd> &fdPoll, int *i, std::string timeInfo, User *Users)
 {   
     char buffer[1000]= {0};
@@ -23,7 +31,7 @@ void ServerRequest(std::vector<pollfd> &fdPoll, int *i, std::string timeInfo, Us
     if(ServerMsg.substr(0, 4) == "time")
         send(fdPoll[*i].fd, timeInfo.c_str(), timeInfo.size(), 0); 
     else if(ServerMsg.substr(0, 4) == "NICK")
-        Users->setUsername(ServerMsg, fdPoll[*i].fd);
+        requestChangeName(fdPoll[*i].fd, ServerMsg, Users);
     else if(ServerMsg.substr(0, 4) == "QUIT" || !bytes)
     {
         close(fdPoll[*i].fd);
