@@ -27,17 +27,44 @@ void requestChangeName(int fd, std::string ServerMsg, User *Users)
     Users->setUsername(newName, fd);
 }
 
+bool IsChanel(std::string message)
+{
+    for(int i = 0; message[i] != ':'; i++)
+        if(message[i] == '#')
+            return(true);
+    return(false);
+}
+
+void requestChanelMessage(User *Users, std::string message, int fd)
+{
+    /* Je suis ici, la j'ai le nom du chanel et je l'ai enregistrer */
+    /* Il faut plus que gerer l'input de PRIVMSG  avec le # */
+    return ;
+}
+
+void requestJoin(User *Users, std::string JoinMsg, int fd)
+{
+    int index = JoinMsg.find('#');
+    std::string ChanelName = JoinMsg.substr(index + 1, JoinMsg.size() - index - 3);
+    Users->setChanel(ChanelName, fd);
+    std::cout << "Chanel Name -> " << Users->getChanelName(fd) << "\n";
+}
+
 void requestMessage(User *Users, std::string message, int fd)
 {
     std::string SendTo;
     int index = message.find(":");
+    if(IsChanel(message))
+    {
+        requestChanelMessage(Users, message, fd);
+        return;
+    }
     if(index)
         SendTo = message.substr(index + 1, message.size() - index - 3);
     for(int i = 0; i < Users->getLen(); i++)
     {
         if(Users->getUserName(i) == SendTo)
         {
-            std::cout <<  Users->getUserName(fd) << " test\n";
             std::string MessageFrom = "\033[0;31mYou:" + message.substr(7, index - 7) + "\r\n";
             std::string MessageTo = "\033[0;32m" + Users->getUserName(fd) + ":" + message.substr(7, index - 7) + "\r\n";
             send(fd, MessageFrom.c_str(), MessageFrom.size(), 0);
@@ -58,6 +85,8 @@ void ServerRequest(std::vector<pollfd> &fdPoll, int *i, User *Users)
         requestChangeName(fdPoll[*i].fd, ServerMsg, Users);
     else if(ServerMsg.substr(0, 7) == "PRIVMSG")
         requestMessage(Users, ServerMsg, fdPoll[*i].fd);
+    else if(ServerMsg.substr(0, 4) == "JOIN")
+        requestJoin(Users, ServerMsg, fdPoll[*i].fd);
     else if(ServerMsg.substr(0, 4) == "QUIT" || !bytes)
     {
         close(fdPoll[*i].fd);

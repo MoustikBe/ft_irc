@@ -19,11 +19,13 @@ private:
 public:
     User(){};
     ~User(){};
-    void setUsername(std::string name, int id);
-    void setSocket(int fd);
+    void        setUsername(std::string name, int id);
+    void        setSocket(int fd);
+    void        setChanel(std::string ChanelName, int fd);
     int         getLen();
     void        getAllDataUser();
     int         getUserFd(int id);
+    std::string getChanelName(int id);
     std::string getUserName(int fd);
 };
 

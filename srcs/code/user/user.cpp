@@ -39,3 +39,13 @@ int User::getUserFd(int id)
 {
     return(_user[id].socketUser);
 }
+
+void User::setChanel(std::string ChanelName, int fd)
+{
+    _user[fd].chanel = ChanelName;
+}
+
+std::string User::getChanelName(int id)
+{
+    return(_user[id].chanel);
+}
