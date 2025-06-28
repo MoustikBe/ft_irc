@@ -21,7 +21,10 @@ public:
     ~User(){};
     void setUsername(std::string name, int id);
     void setSocket(int fd);
-    void getAllDataUser();
+    int         getLen();
+    void        getAllDataUser();
+    int         getUserFd(int id);
+    std::string getUserName(int fd);
 };
 
 #endif

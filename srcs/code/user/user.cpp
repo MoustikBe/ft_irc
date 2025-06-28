@@ -13,9 +13,29 @@ void User::setSocket(int fd)
 
 void User::getAllDataUser()
 {
+    std::cout << "--------------\n";
     for(int i = 0; i < (int)_user.size(); i++)
     {
         if(_user[i].name != "")
             std::cout << _user[i].name << "\n";
     }
+    std::cout << "--------------\n";
+}
+
+std::string User::getUserName(int fd)
+{
+    return(_user[fd].name);
+}
+
+int User::getLen()
+{
+    int count = 0; 
+    for(int i = 0; i < _user.size(); i++)
+        count++;
+    return(count);
+}
+
+int User::getUserFd(int id)
+{
+    return(_user[id].socketUser);
 }
