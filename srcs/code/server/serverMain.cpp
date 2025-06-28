@@ -14,11 +14,21 @@ void ServerNewConnection(int serverSocket, std::string welcome, std::vector<poll
     Users->getAllDataUser();
 }
 
+int detectNewLine(std::string ServerMsg)
+{
+    int index = 0;
+
+    for(int i = 0; ServerMsg[i] != '\n'; i++)
+        index++;
+    return(index);
+}
+
 void requestChangeName(int fd, std::string ServerMsg, User *Users)
 {
     // Need to clean the Server Message to extract only the name before changing it //
-    std::string newName;
-    Users->setUsername(ServerMsg, fd);
+    std::string newName = ServerMsg.substr(5, ServerMsg.size() - 6);
+    std::cout << "Msg ->" << newName << "\n";
+    Users->setUsername(newName, fd);
 }
 
 
@@ -28,7 +38,7 @@ void ServerRequest(std::vector<pollfd> &fdPoll, int *i, std::string timeInfo, Us
     int bytes = recv(fdPoll[*i].fd, buffer, sizeof(buffer), 0);
     std::string ServerMsg(buffer);
 
-    if(ServerMsg.substr(0, 4) == "time")
+    if(ServerMsg.substr(0, 4) == "info")
         send(fdPoll[*i].fd, timeInfo.c_str(), timeInfo.size(), 0); 
     else if(ServerMsg.substr(0, 4) == "NICK")
         requestChangeName(fdPoll[*i].fd, ServerMsg, Users);
@@ -89,6 +99,6 @@ void ServerInit(char **argv)
     listen(serverSocket, 10);
 
 
-    ServerExchange(serverSocket, "001\r\n", "TIME : \r\n");
+    ServerExchange(serverSocket, "001\r\n", "Sending test data \r\n");
     close(serverSocket);
 }
