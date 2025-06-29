@@ -49,3 +49,8 @@ std::string User::getChanelName(int id)
 {
     return(_user[id].chanel);
 }
+
+void User::setAdminChannel(int fd, std::string OwnerChannel)
+{
+    _user[fd].OwnerChannel.push_back(OwnerChannel);
+}

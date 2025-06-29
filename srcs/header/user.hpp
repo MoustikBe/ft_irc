@@ -5,10 +5,11 @@
 
 struct userData
 {
-    std::string name;
-    std::string chanel;
     int         socketUser;
     bool        online;
+    std::string name;
+    std::string chanel;
+    std::vector<std::string> OwnerChannel;
 };
 
 class User
@@ -21,6 +22,7 @@ public:
     ~User(){};
     void        setUsername(std::string name, int id);
     void        setSocket(int fd);
+    void        setAdminChannel(int fd, std::string OwnerChannel);
     void        setChanel(std::string ChanelName, int fd);
     int         getLen();
     void        getAllDataUser();

@@ -48,7 +48,7 @@ void requestChanelMessage(User *Users, std::string message, int fd)
             std::string fullMsg = ":" + Users->getUserName(fd) + "!user@localhost PRIVMSG #" + chanelName + " :" + UserMsg + "\r\n";
             std::cout << "Sending: [" << fullMsg << "] to fd " << Users->getUserFd(i) << std::endl;
             send(Users->getUserFd(i), fullMsg.c_str(), fullMsg.size(), 0);
-        }        
+        } 
     }
     return ;
 }
@@ -56,9 +56,20 @@ void requestChanelMessage(User *Users, std::string message, int fd)
 void requestJoin(User *Users, std::string JoinMsg, int fd)
 {
     int index = JoinMsg.find('#');
+    int flag = 0;
+
     std::string ChanelName = JoinMsg.substr(index + 1, JoinMsg.size() - index - 3);
+    for(int i = 0; i < Users->getLen(); i++)
+    {
+        if(Users->getChanelName(i) == ChanelName)
+            flag = 1;
+    }
+    if(!flag)
+    {
+        std::cout << "L'utilisateur : " << Users->getUserName(fd) << " est devenus admin de " << ChanelName << "\n";
+        Users->setAdminChannel(fd, ChanelName);
+    }
     Users->setChanel(ChanelName, fd);
-    std::cout << "Chanel Name -> " << Users->getChanelName(fd) << "\n";
 }
 
 void requestMessage(User *Users, std::string message, int fd)
@@ -85,6 +96,28 @@ void requestMessage(User *Users, std::string message, int fd)
     }
 }
 
+void requestKick(User *Users, std::string message, int fd)
+{
+    std::istringstream iss(message);
+    std::string KickMessage = "YOU HAVE BEEN KICK OF THIS CHANNEL\r\n";
+    std::string command, channel, nameToKick;
+    iss >> command >> channel >> nameToKick;
+    if(channel[0] == '#')
+        channel = channel.substr(1);
+    for(int i = 0; i < Users->getLen(); i++)
+    {
+        if(Users->getUserName(i) == nameToKick && Users->getChanelName(i) == channel)
+        {
+            int socket = Users->getUserFd(i);
+            std::string notify = ":" + Users->getUserName(fd) + " KICK #" + channel + " " + nameToKick + " :Kicked from channel\r\n";
+            send(socket, notify.c_str(), notify.length(), 0);
+            Users->setChanel("", i);
+        }
+    }
+    std::cout << "Command : " << command << "\nChanel : " << channel << "\nnameToKick : " << nameToKick << "\n"; 
+    
+}
+
 void ServerRequest(std::vector<pollfd> &fdPoll, int *i, User *Users)
 {   
     char buffer[1000]= {0};
@@ -99,6 +132,8 @@ void ServerRequest(std::vector<pollfd> &fdPoll, int *i, User *Users)
         requestMessage(Users, ServerMsg, fdPoll[*i].fd);
     else if(ServerMsg.substr(0, 4) == "JOIN")
         requestJoin(Users, ServerMsg, fdPoll[*i].fd);
+    else if(ServerMsg.substr(0, 4) == "KICK")
+        requestKick(Users, ServerMsg, fdPoll[*i].fd);
     else if(ServerMsg.substr(0, 4) == "QUIT" || !bytes)
     {
         close(fdPoll[*i].fd);

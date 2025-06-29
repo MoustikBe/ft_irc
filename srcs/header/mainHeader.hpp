@@ -6,6 +6,8 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <sstream>
+#include <string>
 /* C */
 #include <poll.h>
 #include <errno.h>
