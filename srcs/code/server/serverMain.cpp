@@ -37,8 +37,19 @@ bool IsChanel(std::string message)
 
 void requestChanelMessage(User *Users, std::string message, int fd)
 {
-    /* Je suis ici, la j'ai le nom du chanel et je l'ai enregistrer */
-    /* Il faut plus que gerer l'input de PRIVMSG  avec le # */
+    int start = message.find('#');
+    int end = message.find(':');
+    std::string chanelName = message.substr(start + 1, end - start - 2);
+    std::string UserMsg = message.substr(end + 1, message.size() - end - 3);
+    for(int i = 0; i < Users->getLen(); i++)
+    {
+        if(Users->getChanelName(i) == chanelName && i != fd)
+        {
+            std::string fullMsg = ":" + Users->getUserName(fd) + "!user@localhost PRIVMSG #" + chanelName + " :" + UserMsg + "\r\n";
+            std::cout << "Sending: [" << fullMsg << "] to fd " << Users->getUserFd(i) << std::endl;
+            send(Users->getUserFd(i), fullMsg.c_str(), fullMsg.size(), 0);
+        }        
+    }
     return ;
 }
 
@@ -65,8 +76,9 @@ void requestMessage(User *Users, std::string message, int fd)
     {
         if(Users->getUserName(i) == SendTo)
         {
-            std::string MessageFrom = "\033[0;31mYou:" + message.substr(7, index - 7) + "\r\n";
-            std::string MessageTo = "\033[0;32m" + Users->getUserName(fd) + ":" + message.substr(7, index - 7) + "\r\n";
+            std::string You = "You";
+            std::string MessageFrom = ":" + You + "!user@localhost PRIVMSG #" + message.substr(7, index - 7) + "\r\n";
+            std::string MessageTo = ":" + Users->getUserName(fd) + "!user@localhost PRIVMSG #" + message.substr(7, index - 7) + "\r\n";
             send(fd, MessageFrom.c_str(), MessageFrom.size(), 0);
             send(Users->getUserFd(i), MessageTo.c_str(), MessageTo.size(), 0);
         } 
