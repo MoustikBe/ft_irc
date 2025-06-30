@@ -3,12 +3,22 @@
 
 #include <iostream>
 
+struct channelStruct
+{
+    std::string channelName;
+    std::string Topic;
+    bool        TopicAdmin;
+    std::string password;
+    bool        passwordActive;
+    size_t      maxUser;
+};
+
 struct userData
 {
     int         socketUser;
     bool        online;
     std::string name;
-    std::vector<std::string> channel;
+    std::vector<channelStruct> channel;
     std::vector<std::string> OwnerChannel;
 };
 

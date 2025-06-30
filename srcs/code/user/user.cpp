@@ -42,14 +42,15 @@ int User::getUserFd(int id)
 
 void User::setChanel(std::string ChanelName, int fd)
 {
-    _user[fd].channel.push_back(ChanelName);
+    channelStruct newChannel= {ChanelName, "", false, "", false, 0};
+    _user[fd].channel.push_back(newChannel);
 }
 
 bool User::getIfChannelExist(std::string channelName, int id)
 {
     for(int i = 0;  i < (int)_user[id].channel.size(); i++)
     {
-        if(_user[id].channel[i].data() == channelName)
+        if(_user[id].channel[i].channelName.data() == channelName)
             return true;
     }
     return false;
@@ -64,7 +65,7 @@ void User::removeChannel(std::string channel, int id)
 {
     for(int i = 0; i < (int)_user[id].channel.size(); i++)
     {
-        if(_user[id].channel[i].data() == channel)
+        if(_user[id].channel[i].channelName.data() == channel)
             _user[id].channel.erase(_user[id].channel.begin() + i);
     }
 }
