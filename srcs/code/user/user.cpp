@@ -79,3 +79,24 @@ bool User::getPrivilege(std::string channel, int id)
     }
     return false;
 }
+
+int User::getChannelIndex(std::string channel, int id)
+{
+    for(int i = 0; i < (int)_user[id].channel.size(); i++)
+    {
+        if(_user[id].channel[i].channelName.data() == channel)
+            return(i);
+    }
+    return(-1);
+}
+
+bool User::getChannelTopicStatus(int id, int index)
+{
+    return(_user[id].channel[index].TopicAdmin);
+}
+
+void User::setTopicChannel(std::string Topic, int id, int currentChannel)
+{
+    _user[id].channel[currentChannel].Topic = Topic;
+    std::cout << "New Topic of channel -> " << _user[id].channel[currentChannel].Topic << "\n";
+}

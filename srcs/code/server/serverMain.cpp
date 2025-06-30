@@ -98,6 +98,38 @@ void requestMessage(User *Users, std::string message, int fd)
     }
 }
 
+void requestTopic(User *Users, std::string message, int fd)
+{
+    std::istringstream iss(message);
+    std::string command, channel, Topic;
+    iss >> command >> channel >> Topic;
+
+    if(channel[0] == '#')
+        channel = channel.substr(1);
+    if(Topic[0] == ':')
+        Topic = Topic.substr(1);
+    int currentChannel = Users->getChannelIndex(channel, fd);
+    std::cout << "current -> " << currentChannel << "\nChannel " << channel; 
+    if(currentChannel != -1)
+    {
+        if(!Users->getChannelTopicStatus(fd, currentChannel))
+        {
+            if(Users->getPrivilege(channel, fd))
+            {
+                std::string commandToSend = "TOPIC #" + channel + " :" + Topic + "\r\n";
+                send(fd, commandToSend.c_str(), commandToSend.length(), 0);
+                Users->setTopicChannel(Topic, fd, currentChannel);
+            }
+        }
+        else
+        {
+            std::string commandToSend = "TOPIC #" + channel + " :" + Topic + "\r\n";
+            send(fd, commandToSend.c_str(), commandToSend.length(), 0);
+            Users->setTopicChannel(Topic, fd, currentChannel);
+        }
+    }
+}
+
 void requestKick(User *Users, std::string message, int fd)
 {
     std::istringstream iss(message);
@@ -140,6 +172,8 @@ void ServerRequest(std::vector<pollfd> &fdPoll, int *i, User *Users)
         requestJoin(Users, ServerMsg, fdPoll[*i].fd);
     else if(ServerMsg.substr(0, 4) == "KICK")
         requestKick(Users, ServerMsg, fdPoll[*i].fd);
+    else if(ServerMsg.substr(0, 5) == "TOPIC")
+        requestTopic(Users, ServerMsg, fdPoll[*i].fd);
     else if(ServerMsg.substr(0, 4) == "QUIT" || !bytes)
     {
         close(fdPoll[*i].fd);

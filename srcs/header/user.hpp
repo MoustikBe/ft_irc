@@ -35,11 +35,14 @@ public:
     void        setSocket(int fd);
     void        setAdminChannel(int fd, std::string OwnerChannel);
     void        setChanel(std::string ChanelName, int fd);
+    void        setTopicChannel(std::string Topic, int id, int currentChannel);
     int         getLen();
     void        getAllDataUser();
     int         getUserFd(int id);
     bool        getIfChannelExist(std::string channelName, int id);
     bool        getPrivilege(std::string channel, int id);
+    int         getChannelIndex(std::string channel, int id);
+    bool        getChannelTopicStatus(int id, int index);
     std::string getUserName(int fd);
 };
 
