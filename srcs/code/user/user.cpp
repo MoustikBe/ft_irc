@@ -30,7 +30,7 @@ std::string User::getUserName(int fd)
 int User::getLen()
 {
     int count = 0; 
-    for(int i = 0; i < _user.size(); i++)
+    for(int i = 0; i < (int)_user.size(); i++)
         count++;
     return(count);
 }
@@ -42,15 +42,29 @@ int User::getUserFd(int id)
 
 void User::setChanel(std::string ChanelName, int fd)
 {
-    _user[fd].chanel = ChanelName;
+    _user[fd].channel.push_back(ChanelName);
 }
 
-std::string User::getChanelName(int id)
+bool User::getIfChannelExist(std::string channelName, int id)
 {
-    return(_user[id].chanel);
+    for(int i = 0;  i < (int)_user[id].channel.size(); i++)
+    {
+        if(_user[id].channel[i].data() == channelName)
+            return true;
+    }
+    return false;
 }
 
 void User::setAdminChannel(int fd, std::string OwnerChannel)
 {
     _user[fd].OwnerChannel.push_back(OwnerChannel);
+}
+
+void User::removeChannel(std::string channel, int id)
+{
+    for(int i = 0; i < (int)_user[id].channel.size(); i++)
+    {
+        if(_user[id].channel[i].data() == channel)
+            _user[id].channel.erase(_user[id].channel.begin() + i);
+    }
 }

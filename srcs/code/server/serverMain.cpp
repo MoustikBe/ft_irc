@@ -41,9 +41,11 @@ void requestChanelMessage(User *Users, std::string message, int fd)
     int end = message.find(':');
     std::string chanelName = message.substr(start + 1, end - start - 2);
     std::string UserMsg = message.substr(end + 1, message.size() - end - 3);
+    if(!Users->getIfChannelExist(chanelName, fd))
+        return ; // Return un message d'erreur au serveur.
     for(int i = 0; i < Users->getLen(); i++)
     {
-        if(Users->getChanelName(i) == chanelName && i != fd)
+        if(Users->getIfChannelExist(chanelName, i) && i != fd)
         {
             std::string fullMsg = ":" + Users->getUserName(fd) + "!user@localhost PRIVMSG #" + chanelName + " :" + UserMsg + "\r\n";
             std::cout << "Sending: [" << fullMsg << "] to fd " << Users->getUserFd(i) << std::endl;
@@ -61,7 +63,7 @@ void requestJoin(User *Users, std::string JoinMsg, int fd)
     std::string ChanelName = JoinMsg.substr(index + 1, JoinMsg.size() - index - 3);
     for(int i = 0; i < Users->getLen(); i++)
     {
-        if(Users->getChanelName(i) == ChanelName)
+        if(!Users->getIfChannelExist(ChanelName, i))
             flag = 1;
     }
     if(!flag)
@@ -106,12 +108,12 @@ void requestKick(User *Users, std::string message, int fd)
         channel = channel.substr(1);
     for(int i = 0; i < Users->getLen(); i++)
     {
-        if(Users->getUserName(i) == nameToKick && Users->getChanelName(i) == channel)
+        if(Users->getUserName(i) == nameToKick && Users->getIfChannelExist(channel, i))
         {
             int socket = Users->getUserFd(i);
             std::string notify = ":" + Users->getUserName(fd) + " KICK #" + channel + " " + nameToKick + " :Kicked from channel\r\n";
             send(socket, notify.c_str(), notify.length(), 0);
-            Users->setChanel("", i);
+            Users->removeChannel(channel, i);
         }
     }
     std::cout << "Command : " << command << "\nChanel : " << channel << "\nnameToKick : " << nameToKick << "\n"; 

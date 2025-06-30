@@ -8,7 +8,7 @@ struct userData
     int         socketUser;
     bool        online;
     std::string name;
-    std::string chanel;
+    std::vector<std::string> channel;
     std::vector<std::string> OwnerChannel;
 };
 
@@ -20,6 +20,7 @@ private:
 public:
     User(){};
     ~User(){};
+    void        removeChannel(std::string channel, int id);
     void        setUsername(std::string name, int id);
     void        setSocket(int fd);
     void        setAdminChannel(int fd, std::string OwnerChannel);
@@ -27,7 +28,7 @@ public:
     int         getLen();
     void        getAllDataUser();
     int         getUserFd(int id);
-    std::string getChanelName(int id);
+    bool        getIfChannelExist(std::string channelName, int id);
     std::string getUserName(int fd);
 };
 
