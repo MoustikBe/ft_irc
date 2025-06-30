@@ -68,3 +68,13 @@ void User::removeChannel(std::string channel, int id)
             _user[id].channel.erase(_user[id].channel.begin() + i);
     }
 }
+
+bool User::getPrivilege(std::string channel, int id)
+{
+    for(int i = 0;  i < (int)_user[id].OwnerChannel.size(); i++)
+    {
+        if(_user[id].OwnerChannel[i].data() == channel)
+            return true;
+    }
+    return false;
+}

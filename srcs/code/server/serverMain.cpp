@@ -63,7 +63,7 @@ void requestJoin(User *Users, std::string JoinMsg, int fd)
     std::string ChanelName = JoinMsg.substr(index + 1, JoinMsg.size() - index - 3);
     for(int i = 0; i < Users->getLen(); i++)
     {
-        if(!Users->getIfChannelExist(ChanelName, i))
+        if(Users->getIfChannelExist(ChanelName, i))
             flag = 1;
     }
     if(!flag)
@@ -101,11 +101,15 @@ void requestMessage(User *Users, std::string message, int fd)
 void requestKick(User *Users, std::string message, int fd)
 {
     std::istringstream iss(message);
-    std::string KickMessage = "YOU HAVE BEEN KICK OF THIS CHANNEL\r\n";
     std::string command, channel, nameToKick;
     iss >> command >> channel >> nameToKick;
     if(channel[0] == '#')
         channel = channel.substr(1);
+    if(!Users->getPrivilege(channel, fd))
+    {
+        std::cout << "No perm\n";
+        return ; // Should output error message
+    }
     for(int i = 0; i < Users->getLen(); i++)
     {
         if(Users->getUserName(i) == nameToKick && Users->getIfChannelExist(channel, i))

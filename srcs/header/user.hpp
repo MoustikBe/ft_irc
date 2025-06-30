@@ -29,6 +29,7 @@ public:
     void        getAllDataUser();
     int         getUserFd(int id);
     bool        getIfChannelExist(std::string channelName, int id);
+    bool        getPrivilege(std::string channel, int id);
     std::string getUserName(int fd);
 };
 
