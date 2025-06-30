@@ -10,6 +10,7 @@ struct channelStruct
     bool        TopicAdmin;
     std::string password;
     bool        passwordActive;
+    bool        InviteOnly;
     size_t      maxUser;
 };
 
@@ -20,6 +21,7 @@ struct userData
     std::string name;
     std::vector<channelStruct> channel;
     std::vector<std::string> OwnerChannel;
+    std::vector<std::string> invitedChannel;
 };
 
 class User
@@ -36,6 +38,7 @@ public:
     void        setAdminChannel(int fd, std::string OwnerChannel);
     void        setChanel(std::string ChanelName, int fd);
     void        setTopicChannel(std::string Topic, int id, int currentChannel);
+    void        setInvitationChannel(std::string Invitation, int id);
     int         getLen();
     void        getAllDataUser();
     int         getUserFd(int id);
@@ -43,6 +46,8 @@ public:
     bool        getPrivilege(std::string channel, int id);
     int         getChannelIndex(std::string channel, int id);
     bool        getChannelTopicStatus(int id, int index);
+    bool        getIfIsOnlyInvitation(std::string channel);
+    bool        getIfChannelInvitation(std::string channel, int id);
     std::string getUserName(int fd);
 };
 

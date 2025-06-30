@@ -42,7 +42,7 @@ int User::getUserFd(int id)
 
 void User::setChanel(std::string ChanelName, int fd)
 {
-    channelStruct newChannel= {ChanelName, "", false, "", false, 0};
+    channelStruct newChannel= {ChanelName, "", false, "", false, true, 0};
     _user[fd].channel.push_back(newChannel);
 }
 
@@ -99,4 +99,37 @@ void User::setTopicChannel(std::string Topic, int id, int currentChannel)
 {
     _user[id].channel[currentChannel].Topic = Topic;
     std::cout << "New Topic of channel -> " << _user[id].channel[currentChannel].Topic << "\n";
+}
+
+void User::setInvitationChannel(std::string Invitation, int id)
+{
+    for(int i = 0; i < (int)_user[id].invitedChannel.size(); i++)
+    {
+        if(_user[id].invitedChannel[i].data() == Invitation)
+            return ;
+    }
+    _user[id].invitedChannel.push_back(Invitation);
+}
+
+bool User::getIfIsOnlyInvitation(std::string channel)
+{
+    for(int j = 0; j < (int)_user.size(); j++)
+    {
+        for(int i = 0; i < (int)_user[j].channel.size(); i++)
+        {
+            if(_user[j].channel[i].channelName == channel && _user[j].channel[i].InviteOnly)
+                return(true);
+        }
+    }
+    return(false);
+}
+
+bool User::getIfChannelInvitation(std::string channel, int id)
+{
+    for(int i = 0; i < (int)_user[id].invitedChannel.size(); i++)
+    {
+        if(_user[id].invitedChannel[i].data() == channel)
+            return true;
+    }
+    return false;
 }

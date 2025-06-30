@@ -61,17 +61,30 @@ void requestJoin(User *Users, std::string JoinMsg, int fd)
     int flag = 0;
 
     std::string ChanelName = JoinMsg.substr(index + 1, JoinMsg.size() - index - 3);
-    for(int i = 0; i < Users->getLen(); i++)
+    if(Users->getIfIsOnlyInvitation(ChanelName))
     {
-        if(Users->getIfChannelExist(ChanelName, i))
-            flag = 1;
+        std::cout << "Channel trouver dans la range de user\n";
+        if(Users->getIfChannelInvitation(ChanelName, fd))
+        {
+            Users->setChanel(ChanelName, fd);
+        }
+        else
+            std::cout << "chanel not found in the invitation slot\n";
     }
-    if(!flag)
+    else
     {
-        std::cout << "L'utilisateur : " << Users->getUserName(fd) << " est devenus admin de " << ChanelName << "\n";
-        Users->setAdminChannel(fd, ChanelName);
+        for(int i = 0; i < Users->getLen(); i++)
+        {
+            if(Users->getIfChannelExist(ChanelName, i))
+                flag = 1; 
+        }
+        if(!flag)
+        {
+            std::cout << "L'utilisateur : " << Users->getUserName(fd) << " est devenus admin de " << ChanelName << "\n";
+            Users->setAdminChannel(fd, ChanelName);
+        }
+        Users->setChanel(ChanelName, fd);
     }
-    Users->setChanel(ChanelName, fd);
 }
 
 void requestMessage(User *Users, std::string message, int fd)
@@ -156,6 +169,26 @@ void requestKick(User *Users, std::string message, int fd)
     
 }
 
+void requestInvite(User *Users, std::string message, int fd)
+{
+    std::istringstream iss(message);
+    std::string command, nameToInvite, channel;
+    iss >> command >> nameToInvite >> channel;
+
+    if(channel[0] == '#')
+        channel = channel.substr(1);
+    for(int i = 0; i < Users->getLen(); i++)
+    {
+        if(Users->getUserName(i) == nameToInvite)
+        {
+            std::string notify = Users->getUserName(fd) + " invited you to join " + channel + "\r\n";
+            send(i, notify.c_str(), notify.length(), 0);
+            Users->setInvitationChannel(channel, i);
+        }
+    }
+}
+
+
 void ServerRequest(std::vector<pollfd> &fdPoll, int *i, User *Users)
 {   
     char buffer[1000]= {0};
@@ -174,6 +207,8 @@ void ServerRequest(std::vector<pollfd> &fdPoll, int *i, User *Users)
         requestKick(Users, ServerMsg, fdPoll[*i].fd);
     else if(ServerMsg.substr(0, 5) == "TOPIC")
         requestTopic(Users, ServerMsg, fdPoll[*i].fd);
+    else if(ServerMsg.substr(0, 6) == "INVITE")
+        requestInvite(Users, ServerMsg, fdPoll[*i].fd);
     else if(ServerMsg.substr(0, 4) == "QUIT" || !bytes)
     {
         close(fdPoll[*i].fd);
