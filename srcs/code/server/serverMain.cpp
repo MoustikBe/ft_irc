@@ -194,9 +194,25 @@ void  requestMode(User *Users, std::string message, int fd)
         channel = channel.substr(1);
     if(flag == "-i")
     {
-        std::string notify = Users->getUserName(fd) + " invitation only statement " + channel + "\r\n";
+        std::string notify = Users->getUserName(fd) + " invitation only restriction has been changed " + channel + "\r\n";
         send(fd, notify.c_str(), notify.length(), 0);
-        Users->setChangeInvitation(channel);
+        Users->setBoolReverse(channel, &channelStruct::InviteOnly);
+    }
+    else if(flag == "-t")
+    {
+        std::string notify = Users->getUserName(fd) + " topic only changed by admin has been changed " + channel + "\r\n";
+        send(fd, notify.c_str(), notify.length(), 0);
+        Users->setBoolReverse(channel, &channelStruct::TopicActive);
+    }
+    else if(flag == "-o" )
+    {
+        std::string UserName;
+        iss >> UserName;
+        // voir si le userName exist et en extraire son id //
+        int id = Users->getUserIdByName(UserName);
+        if(id == -1)
+            return; // User not found, error //
+        Users->setAdminChannel(id, channel);
     }
 }
 

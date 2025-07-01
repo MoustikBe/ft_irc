@@ -40,10 +40,11 @@ public:
     void        setChanel(std::string ChanelName, int fd);
     void        setTopicChannel(std::string Topic, int currentChannel);
     void        setInvitationChannel(std::string Invitation, int id);
-    void        setChangeInvitation(std::string channel);
+    void        setBoolReverse(std::string channel, bool channelStruct::*flag);
     int         getLen();
     void        getAllDataUser();
     int         getUserFd(int id);
+    int         getUserIdByName(std::string name);
     bool        getIfUserIsInChannel(std::string channelName, int id);
     bool        getPrivilege(std::string channel, int id);
     int         getChannelIndex(std::string channel);

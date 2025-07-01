@@ -66,6 +66,16 @@ bool User::getIfChannelExist(std::string channel)
 }
 void User::setAdminChannel(int fd, std::string OwnerChannel)
 {
+    // faudrais rajouter des verifications sah, surtout que c'est aussi pour le dem od//
+    for(int i = 0; i < (int)_user[fd].OwnerChannel.size(); i++)
+    {
+        if(_user[fd].OwnerChannel[i].data() == OwnerChannel)
+        {
+            // Match, duplicate owning detected. remoing privilege // 
+            _user[fd].OwnerChannel.erase(_user[fd].OwnerChannel.begin() + i);
+            return ;
+        }
+    }
     _user[fd].OwnerChannel.push_back(OwnerChannel);
 }
 
@@ -139,16 +149,16 @@ bool User::getIfChannelInvitation(std::string channel, int id)
     return false;
 }
 
-void User::setChangeInvitation(std::string channel)
+void User::setBoolReverse(std::string channel, bool channelStruct::*flag)
 {
     for(int i = 0; i < (int)_userChannel.size(); i++)
     {
         if(_userChannel[i].channelName.data() == channel)
         {
-            if(_userChannel[i].InviteOnly)
-                _userChannel[i].InviteOnly = false;
+            if(_userChannel[i].*flag)
+                _userChannel[i].*flag = false;
             else
-                _userChannel[i].InviteOnly = true;
+                _userChannel[i].*flag = true;
         }
     }
 }
@@ -157,4 +167,14 @@ void User::CreateChannel(std::string channel)
 {
     channelStruct newChannel = {channel, "", true, "", false, false, 0};
     _userChannel.push_back(newChannel);
+}
+
+int User::getUserIdByName(std::string UserName)
+{
+    for(int i = 0; i < (int)_user.size(); i++)
+    {
+        if(_user[i].name.data() == UserName)
+            return(i);
+    }
+    return(-1);
 }
