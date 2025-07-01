@@ -38,10 +38,11 @@ public:
     void        setUsername(std::string name, int id);
     void        setSocket(int fd);
     void        setAdminChannel(int fd, std::string OwnerChannel);
+    void        unsetAdminChannel(int fd, std::string OwnerChannel);
     void        setChanel(std::string ChanelName, int fd);
     void        setTopicChannel(std::string Topic, int currentChannel);
     void        setInvitationChannel(std::string Invitation, int id);
-    void        setBoolReverse(std::string channel, bool channelStruct::*flag);
+    void        setBoolReverse(std::string channel, bool channelStruct::*flag, bool val);
     void        setLimitChannel(std::string channel, int nb);
     int         getLen();
     void        getAllDataUser();

@@ -201,35 +201,47 @@ void  requestMode(User *Users, std::string message, int fd)
 
     if(channel[0] == '#')
         channel = channel.substr(1);
-    if(flag == "-i")
+    if(flag == "-i" || flag == "+i")
     {
         std::string notify = Users->getUserName(fd) + " invitation only restriction has been changed " + channel + "\r\n";
         send(fd, notify.c_str(), notify.length(), 0);
-        Users->setBoolReverse(channel, &channelStruct::InviteOnly);
+        if(flag == "+i")
+            Users->setBoolReverse(channel, &channelStruct::InviteOnly, true);
+        else 
+            Users->setBoolReverse(channel, &channelStruct::InviteOnly, false);
     }
-    else if(flag == "-t")
+    else if(flag == "-t" || flag == "+t")
     {
         std::string notify = Users->getUserName(fd) + " topic only changed by admin has been changed " + channel + "\r\n";
         send(fd, notify.c_str(), notify.length(), 0);
-        Users->setBoolReverse(channel, &channelStruct::TopicActive);
+        if(flag == "+t")
+            Users->setBoolReverse(channel, &channelStruct::TopicActive, true);
+        else
+            Users->setBoolReverse(channel, &channelStruct::TopicActive, false);
     }
-    else if(flag == "-o" )
+    else if(flag == "-o" || flag == "+o")
     {
         std::string UserName;
         iss >> UserName;
-        // voir si le userName exist et en extraire son id //
+
         int id = Users->getUserIdByName(UserName);
         if(id == -1)
             return; // User not found, error //
-        Users->setAdminChannel(id, channel);
+        if(flag == "+o")
+            Users->setAdminChannel(id, channel);
+        else 
+            Users->unsetAdminChannel(id, channel);
     }
-    else if(flag == "-l")
-        Users->setLimitChannel(channel, -1);
-    else if(flag == "+l")
+    else if(flag == "-l" || flag == "+l")
     {
-        std::string limit;
-        iss >> limit;
-        Users->setLimitChannel(channel, atoi(limit.c_str()));
+        if(flag == "-l")
+            Users->setLimitChannel(channel, -1);
+        else
+        {
+            std::string limit;
+            iss >> limit;
+            Users->setLimitChannel(channel, atoi(limit.c_str()));
+        }
     }
 }
 
