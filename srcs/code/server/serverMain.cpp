@@ -41,11 +41,11 @@ void requestChanelMessage(User *Users, std::string message, int fd)
     int end = message.find(':');
     std::string chanelName = message.substr(start + 1, end - start - 2);
     std::string UserMsg = message.substr(end + 1, message.size() - end - 3);
-    if(!Users->getIfChannelExist(chanelName, fd))
+    if(!Users->getIfUserIsInChannel(chanelName, fd))
         return ; // Return un message d'erreur au serveur.
     for(int i = 0; i < Users->getLen(); i++)
     {
-        if(Users->getIfChannelExist(chanelName, i) && i != fd)
+        if(Users->getIfUserIsInChannel(chanelName, i) && i != fd)
         {
             std::string fullMsg = ":" + Users->getUserName(fd) + "!user@localhost PRIVMSG #" + chanelName + " :" + UserMsg + "\r\n";
             std::cout << "Sending: [" << fullMsg << "] to fd " << Users->getUserFd(i) << std::endl;
@@ -63,25 +63,21 @@ void requestJoin(User *Users, std::string JoinMsg, int fd)
     std::string ChanelName = JoinMsg.substr(index + 1, JoinMsg.size() - index - 3);
     if(Users->getIfIsOnlyInvitation(ChanelName))
     {
-        std::cout << "Channel trouver dans la range de user\n";
+        std::cout << "Channel trouver, et est en invite only\n";
         if(Users->getIfChannelInvitation(ChanelName, fd))
-        {
             Users->setChanel(ChanelName, fd);
-        }
         else
-            std::cout << "chanel not found in the invitation slot\n";
+            std::cout << "Tu n'as le channel dans la liste de channel qui ton inviter\n";
     }
     else
     {
-        for(int i = 0; i < Users->getLen(); i++)
-        {
-            if(Users->getIfChannelExist(ChanelName, i))
-                flag = 1; 
-        }
+        if(Users->getIfChannelExist(ChanelName))
+            flag = 1; 
         if(!flag)
         {
             std::cout << "L'utilisateur : " << Users->getUserName(fd) << " est devenus admin de " << ChanelName << "\n";
             Users->setAdminChannel(fd, ChanelName);
+            Users->CreateChannel(ChanelName);
         }
         Users->setChanel(ChanelName, fd);
     }
@@ -121,24 +117,24 @@ void requestTopic(User *Users, std::string message, int fd)
         channel = channel.substr(1);
     if(Topic[0] == ':')
         Topic = Topic.substr(1);
-    int currentChannel = Users->getChannelIndex(channel, fd);
+    int currentChannel = Users->getChannelIndex(channel);
     std::cout << "current -> " << currentChannel << "\nChannel " << channel; 
     if(currentChannel != -1)
     {
-        if(!Users->getChannelTopicStatus(fd, currentChannel))
+        if(Users->getChannelTopicStatus(currentChannel))
         {
             if(Users->getPrivilege(channel, fd))
             {
                 std::string commandToSend = "TOPIC #" + channel + " :" + Topic + "\r\n";
                 send(fd, commandToSend.c_str(), commandToSend.length(), 0);
-                Users->setTopicChannel(Topic, fd, currentChannel);
+                Users->setTopicChannel(Topic, currentChannel);
             }
         }
         else
         {
             std::string commandToSend = "TOPIC #" + channel + " :" + Topic + "\r\n";
             send(fd, commandToSend.c_str(), commandToSend.length(), 0);
-            Users->setTopicChannel(Topic, fd, currentChannel);
+            Users->setTopicChannel(Topic, currentChannel);
         }
     }
 }
@@ -157,7 +153,7 @@ void requestKick(User *Users, std::string message, int fd)
     }
     for(int i = 0; i < Users->getLen(); i++)
     {
-        if(Users->getUserName(i) == nameToKick && Users->getIfChannelExist(channel, i))
+        if(Users->getUserName(i) == nameToKick && Users->getIfUserIsInChannel(channel, i))
         {
             int socket = Users->getUserFd(i);
             std::string notify = ":" + Users->getUserName(fd) + " KICK #" + channel + " " + nameToKick + " :Kicked from channel\r\n";
@@ -188,6 +184,21 @@ void requestInvite(User *Users, std::string message, int fd)
     }
 }
 
+void  requestMode(User *Users, std::string message, int fd)
+{
+    std::istringstream iss(message);
+    std::string command, channel, flag;
+    iss >> command >> channel >> flag;
+
+    if(channel[0] == '#')
+        channel = channel.substr(1);
+    if(flag == "-i")
+    {
+        std::string notify = Users->getUserName(fd) + " invitation only statement " + channel + "\r\n";
+        send(fd, notify.c_str(), notify.length(), 0);
+        Users->setChangeInvitation(channel);
+    }
+}
 
 void ServerRequest(std::vector<pollfd> &fdPoll, int *i, User *Users)
 {   
@@ -209,6 +220,8 @@ void ServerRequest(std::vector<pollfd> &fdPoll, int *i, User *Users)
         requestTopic(Users, ServerMsg, fdPoll[*i].fd);
     else if(ServerMsg.substr(0, 6) == "INVITE")
         requestInvite(Users, ServerMsg, fdPoll[*i].fd);
+    else if(ServerMsg.substr(0, 4) == "MODE")
+        requestMode(Users, ServerMsg, fdPoll[*i].fd);
     else if(ServerMsg.substr(0, 4) == "QUIT" || !bytes)
     {
         close(fdPoll[*i].fd);

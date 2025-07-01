@@ -42,20 +42,28 @@ int User::getUserFd(int id)
 
 void User::setChanel(std::string ChanelName, int fd)
 {
-    channelStruct newChannel= {ChanelName, "", false, "", false, true, 0};
-    _user[fd].channel.push_back(newChannel);
+    _user[fd].InChannel.push_back(ChanelName);
 }
 
-bool User::getIfChannelExist(std::string channelName, int id)
+bool User::getIfUserIsInChannel(std::string channelName, int id)
 {
-    for(int i = 0;  i < (int)_user[id].channel.size(); i++)
+    for(int i = 0;  i < (int)_user[id].InChannel.size(); i++)
     {
-        if(_user[id].channel[i].channelName.data() == channelName)
+        if(_user[id].InChannel[i].data() == channelName)
             return true;
     }
     return false;
 }
 
+bool User::getIfChannelExist(std::string channel)
+{
+    for(int i = 0; i < (int)_userChannel.size(); i++)
+    {
+        if(_userChannel[i].channelName.data() == channel)
+            return(true);
+    }
+    return(false);
+}
 void User::setAdminChannel(int fd, std::string OwnerChannel)
 {
     _user[fd].OwnerChannel.push_back(OwnerChannel);
@@ -63,10 +71,10 @@ void User::setAdminChannel(int fd, std::string OwnerChannel)
 
 void User::removeChannel(std::string channel, int id)
 {
-    for(int i = 0; i < (int)_user[id].channel.size(); i++)
+    for(int i = 0; i < (int)_user[id].InChannel.size(); i++)
     {
-        if(_user[id].channel[i].channelName.data() == channel)
-            _user[id].channel.erase(_user[id].channel.begin() + i);
+        if(_user[id].InChannel[i].data() == channel)
+            _user[id].InChannel.erase(_user[id].InChannel.begin() + i);
     }
 }
 
@@ -80,25 +88,25 @@ bool User::getPrivilege(std::string channel, int id)
     return false;
 }
 
-int User::getChannelIndex(std::string channel, int id)
+int User::getChannelIndex(std::string channel)
 {
-    for(int i = 0; i < (int)_user[id].channel.size(); i++)
+    for(int i = 0; i < (int)_userChannel.size(); i++)
     {
-        if(_user[id].channel[i].channelName.data() == channel)
+        if(_userChannel[i].channelName.data() == channel)
             return(i);
     }
     return(-1);
 }
 
-bool User::getChannelTopicStatus(int id, int index)
+bool User::getChannelTopicStatus(int index)
 {
-    return(_user[id].channel[index].TopicAdmin);
+    return(_userChannel[index].TopicActive);
 }
 
-void User::setTopicChannel(std::string Topic, int id, int currentChannel)
+void User::setTopicChannel(std::string Topic, int currentChannel)
 {
-    _user[id].channel[currentChannel].Topic = Topic;
-    std::cout << "New Topic of channel -> " << _user[id].channel[currentChannel].Topic << "\n";
+    _userChannel[currentChannel].Topic = Topic;
+    std::cout << "New Topic of channel -> " << _userChannel[currentChannel].Topic << "\n";
 }
 
 void User::setInvitationChannel(std::string Invitation, int id)
@@ -113,13 +121,10 @@ void User::setInvitationChannel(std::string Invitation, int id)
 
 bool User::getIfIsOnlyInvitation(std::string channel)
 {
-    for(int j = 0; j < (int)_user.size(); j++)
+    for(int i = 0; i < (int)_userChannel.size(); i++)
     {
-        for(int i = 0; i < (int)_user[j].channel.size(); i++)
-        {
-            if(_user[j].channel[i].channelName == channel && _user[j].channel[i].InviteOnly)
-                return(true);
-        }
+        if(_userChannel[i].channelName.data() == channel && _userChannel[i].InviteOnly)
+            return(true);        
     }
     return(false);
 }
@@ -132,4 +137,24 @@ bool User::getIfChannelInvitation(std::string channel, int id)
             return true;
     }
     return false;
+}
+
+void User::setChangeInvitation(std::string channel)
+{
+    for(int i = 0; i < (int)_userChannel.size(); i++)
+    {
+        if(_userChannel[i].channelName.data() == channel)
+        {
+            if(_userChannel[i].InviteOnly)
+                _userChannel[i].InviteOnly = false;
+            else
+                _userChannel[i].InviteOnly = true;
+        }
+    }
+}
+
+void User::CreateChannel(std::string channel)
+{
+    channelStruct newChannel = {channel, "", true, "", false, false, 0};
+    _userChannel.push_back(newChannel);
 }

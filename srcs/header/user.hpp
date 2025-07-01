@@ -7,7 +7,7 @@ struct channelStruct
 {
     std::string channelName;
     std::string Topic;
-    bool        TopicAdmin;
+    bool        TopicActive;
     std::string password;
     bool        passwordActive;
     bool        InviteOnly;
@@ -19,7 +19,7 @@ struct userData
     int         socketUser;
     bool        online;
     std::string name;
-    std::vector<channelStruct> channel;
+    std::vector<std::string> InChannel;
     std::vector<std::string> OwnerChannel;
     std::vector<std::string> invitedChannel;
 };
@@ -27,7 +27,8 @@ struct userData
 class User
 {
 private:
-    std::map<int, userData> _user;
+    std::map<int, userData>     _user;
+    std::vector<channelStruct>  _userChannel;
 
 public:
     User(){};
@@ -37,18 +38,22 @@ public:
     void        setSocket(int fd);
     void        setAdminChannel(int fd, std::string OwnerChannel);
     void        setChanel(std::string ChanelName, int fd);
-    void        setTopicChannel(std::string Topic, int id, int currentChannel);
+    void        setTopicChannel(std::string Topic, int currentChannel);
     void        setInvitationChannel(std::string Invitation, int id);
+    void        setChangeInvitation(std::string channel);
     int         getLen();
     void        getAllDataUser();
     int         getUserFd(int id);
-    bool        getIfChannelExist(std::string channelName, int id);
+    bool        getIfUserIsInChannel(std::string channelName, int id);
     bool        getPrivilege(std::string channel, int id);
-    int         getChannelIndex(std::string channel, int id);
-    bool        getChannelTopicStatus(int id, int index);
+    int         getChannelIndex(std::string channel);
+    bool        getChannelTopicStatus(int index);
     bool        getIfIsOnlyInvitation(std::string channel);
     bool        getIfChannelInvitation(std::string channel, int id);
+    bool        getIfChannelExist(std::string channel);
     std::string getUserName(int fd);
+
+    void        CreateChannel(std::string channel);
 };
 
 #endif
