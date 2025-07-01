@@ -165,7 +165,7 @@ void User::setBoolReverse(std::string channel, bool channelStruct::*flag)
 
 void User::CreateChannel(std::string channel)
 {
-    channelStruct newChannel = {channel, "", true, "", false, false, 0};
+    channelStruct newChannel = {channel, "", true, "", false, false, 0, -1};
     _userChannel.push_back(newChannel);
 }
 
@@ -177,4 +177,32 @@ int User::getUserIdByName(std::string UserName)
             return(i);
     }
     return(-1);
+}
+
+void User::setLimitChannel(std::string channel, int nb)
+{
+    for(int i = 0; i < (int)_userChannel.size(); i++)
+    {
+        if(_userChannel[i].channelName.data() == channel)
+            _userChannel[i].maxUser = nb;
+    }
+    std::cout << "New limit -> " << nb;
+}
+
+bool User::getIfChannelNotFull(std::string channel)
+{
+    for(int i = 0; i < (int)_userChannel.size(); i++)
+    {
+        if(_userChannel[i].channelName.data() == channel)
+        {
+            if(_userChannel[i].actualUser > _userChannel[i].maxUser && _userChannel[i].maxUser != -1)
+                return(false);
+            else
+            {
+                _userChannel[i].actualUser++;
+                return(true);
+            }
+        }
+    }
+    return(false);
 }

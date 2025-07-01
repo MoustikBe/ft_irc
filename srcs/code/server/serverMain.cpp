@@ -65,7 +65,10 @@ void requestJoin(User *Users, std::string JoinMsg, int fd)
     {
         std::cout << "Channel trouver, et est en invite only\n";
         if(Users->getIfChannelInvitation(ChanelName, fd))
-            Users->setChanel(ChanelName, fd);
+        {
+            if(Users->getIfChannelNotFull(ChanelName))
+                Users->setChanel(ChanelName, fd);
+        }
         else
             std::cout << "Tu n'as le channel dans la liste de channel qui ton inviter\n";
     }
@@ -79,7 +82,13 @@ void requestJoin(User *Users, std::string JoinMsg, int fd)
             Users->setAdminChannel(fd, ChanelName);
             Users->CreateChannel(ChanelName);
         }
-        Users->setChanel(ChanelName, fd);
+        if(Users->getIfChannelNotFull(ChanelName))
+        {
+            std::cout << "adding the channnel";
+            Users->setChanel(ChanelName, fd);
+        }
+        else 
+            std::cout << "C'est full";
     }
 }
 
@@ -213,6 +222,14 @@ void  requestMode(User *Users, std::string message, int fd)
         if(id == -1)
             return; // User not found, error //
         Users->setAdminChannel(id, channel);
+    }
+    else if(flag == "-l")
+        Users->setLimitChannel(channel, -1);
+    else if(flag == "+l")
+    {
+        std::string limit;
+        iss >> limit;
+        Users->setLimitChannel(channel, atoi(limit.c_str()));
     }
 }
 

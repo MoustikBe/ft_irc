@@ -11,7 +11,8 @@ struct channelStruct
     std::string password;
     bool        passwordActive;
     bool        InviteOnly;
-    size_t      maxUser;
+    int      actualUser;
+    int      maxUser;
 };
 
 struct userData
@@ -41,6 +42,7 @@ public:
     void        setTopicChannel(std::string Topic, int currentChannel);
     void        setInvitationChannel(std::string Invitation, int id);
     void        setBoolReverse(std::string channel, bool channelStruct::*flag);
+    void        setLimitChannel(std::string channel, int nb);
     int         getLen();
     void        getAllDataUser();
     int         getUserFd(int id);
@@ -52,6 +54,7 @@ public:
     bool        getIfIsOnlyInvitation(std::string channel);
     bool        getIfChannelInvitation(std::string channel, int id);
     bool        getIfChannelExist(std::string channel);
+    bool        getIfChannelNotFull(std::string channel);
     std::string getUserName(int fd);
 
     void        CreateChannel(std::string channel);
