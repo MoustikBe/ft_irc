@@ -7,13 +7,14 @@ Done
 - The server manage the command PART
 - The server manage : /KICK /INVITE /TOPIC /MODE (with all different option)
 - User can use /nick to change name 
-
-Not done
 - Need to implement a authentification with password
 - Need to check the availibity of a name before set it 
+
+Not done
+- La commande leave
 - Need to send notification of all the action to all user
 - Need to clean my code and make it more effeciency 
-
+- Regler les problemes lier au faites que un utilisateur parte mes ses data reste dans le USERS[]
 --------------------------------------------------------------------------------------------------------
 
 Subject 

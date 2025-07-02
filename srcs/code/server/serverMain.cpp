@@ -24,7 +24,7 @@ int detectNewLine(std::string ServerMsg)
 void requestChangeName(int fd, std::string ServerMsg, User *Users)
 {
     std::string newName = ServerMsg.substr(5, ServerMsg.size() - 7);
-    Users->setUsername(newName, fd);
+    Users->getNameValidity(fd, newName, &userData::name, &userData::hasProvideNickName);
 }
 
 bool IsChanel(std::string message)
@@ -287,34 +287,72 @@ void ServerRequest(std::vector<pollfd> &fdPoll, int *i, User *Users, Server *srv
     int bytes = recv(fdPoll[*i].fd, buffer, sizeof(buffer), 0);
     std::string ServerMsg(buffer);
 
-    if(ServerMsg.substr(0, 4) == "info")
-        Users->getAllDataUser();
-    else if(ServerMsg.substr(0, 4) == "NICK")
-        requestChangeName(fdPoll[*i].fd, ServerMsg, Users);
-    else if(ServerMsg.substr(0, 7) == "PRIVMSG")
-        requestMessage(Users, ServerMsg, fdPoll[*i].fd);
-    else if(ServerMsg.substr(0, 4) == "JOIN")
-        requestJoin(Users, ServerMsg, fdPoll[*i].fd);
-    else if(ServerMsg.substr(0, 4) == "KICK")
-        requestKick(Users, ServerMsg, fdPoll[*i].fd);
-    else if(ServerMsg.substr(0, 5) == "TOPIC")
-        requestTopic(Users, ServerMsg, fdPoll[*i].fd);
-    else if(ServerMsg.substr(0, 6) == "INVITE")
-        requestInvite(Users, ServerMsg, fdPoll[*i].fd);
-    else if(ServerMsg.substr(0, 4) == "MODE")
-        requestMode(Users, ServerMsg, fdPoll[*i].fd);
-    else if(ServerMsg.substr(0, 4) == "PART")
-        requestPart(Users, ServerMsg, fdPoll[*i].fd);
-    else if(ServerMsg.substr(0, 4) == "QUIT" || !bytes)
+    if(Users->getIfhasHabilitation(fdPoll[*i].fd))
+    {
+        if(ServerMsg.substr(0, 4) == "info")
+            Users->getAllDataUser();
+        else if(ServerMsg.substr(0, 4) == "NICK")
+            requestChangeName(fdPoll[*i].fd, ServerMsg, Users);
+        else if(ServerMsg.substr(0, 7) == "PRIVMSG")
+            requestMessage(Users, ServerMsg, fdPoll[*i].fd);
+        else if(ServerMsg.substr(0, 4) == "JOIN")
+            requestJoin(Users, ServerMsg, fdPoll[*i].fd);
+        else if(ServerMsg.substr(0, 4) == "KICK")
+            requestKick(Users, ServerMsg, fdPoll[*i].fd);
+        else if(ServerMsg.substr(0, 5) == "TOPIC")
+            requestTopic(Users, ServerMsg, fdPoll[*i].fd);
+        else if(ServerMsg.substr(0, 6) == "INVITE")
+            requestInvite(Users, ServerMsg, fdPoll[*i].fd);
+        else if(ServerMsg.substr(0, 4) == "MODE")
+            requestMode(Users, ServerMsg, fdPoll[*i].fd);
+        else if(ServerMsg.substr(0, 4) == "PART")
+            requestPart(Users, ServerMsg, fdPoll[*i].fd);
+        else if(ServerMsg.substr(0, 4) == "QUIT" || !bytes)
+        {
+            close(fdPoll[*i].fd);
+            fdPoll.erase(fdPoll.begin() + *i);
+            std::cout << "Connection stopped\n";    
+            (*i)--;
+        }
+        std::cout << ServerMsg;
+    }
+    else if(Users->getCredit(fdPoll[*i].fd))
+    {
+        std::istringstream stream(ServerMsg);
+        std::string line;
+        std::vector<std::string> commands;
+
+        while (std::getline(stream, line)) 
+        {
+            if (!line.empty() && line[line.size() - 1] == '\r')
+                line.erase(line.size() - 1);
+            if (!line.empty())
+                commands.push_back(line);
+        }
+        for(int k = 0; k < (int)commands.size(); k++)
+        {
+            
+            std::istringstream iss(commands[k]);
+            std::string command, option;
+            iss >> command >> option;
+            if(commands[k].substr(0, 4) == "PASS")
+                Users->getPasswordValidity(fdPoll[*i].fd, option, srv);
+            if(commands[k].substr(0, 4) == "NICK")
+                Users->getNameValidity(fdPoll[*i].fd, option, &userData::name, &userData::hasProvideNickName);
+            if(commands[k].substr(0, 4) == "USER")
+                Users->getNameValidity(fdPoll[*i].fd, option, &userData::username, &userData::hasProvideUserName );
+            std::cout << command.data() << "\n";
+        }
+        Users->removeACredit(fdPoll[*i].fd); // Faudrait implementer un message d'erreur mais dans tout les cas c'est foutus pour lui sans le mdp //
+    }
+    else
     {
         close(fdPoll[*i].fd);
         fdPoll.erase(fdPoll.begin() + *i);
-        std::cout << "Connection stopped\n";    
+        std::cout << "Connection refused, password issue\n";    
         (*i)--;
     }
-    std::cout << ServerMsg;
 }
-
 void ServerExchange(int serverSocket, std::string welcome, Server *srv)
 {
     int id = 0;
@@ -355,7 +393,7 @@ void ServerData(sockaddr_in *address, Server srv)
 
 void ServerInit(char **argv)
 {
-    Server srv(atoi(argv[1]), argv[1]);
+    Server srv(atoi(argv[1]), argv[2]);
     sockaddr_in address;
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     int opt = 1;

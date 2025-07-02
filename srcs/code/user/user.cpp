@@ -8,7 +8,10 @@ void User::setUsername(std::string name, int fd)
 
 void User::setSocket(int fd)
 {
+    _user[fd].credit = 4;
     _user[fd].hasProvidePassword = false;
+    _user[fd].hasProvideNickName = false;
+    _user[fd].hasProvideUserName = false;
     _user[fd].socketUser = fd;
 }
 
@@ -237,14 +240,58 @@ void User::setPassword(std::string channel, std::string password)
     }
 }
 
-bool User::getIfUserHasPassword(int id)
+bool User::getIfhasHabilitation(int id)
 {
-    return(_user[id].hasProvidePassword);
+    if(_user[id].hasProvidePassword && _user[id].hasProvideNickName &&_user[id].hasProvideUserName)
+        return(true); 
+    return(false);
 }
 
 void User::getPasswordValidity(int id, std::string password, Server *srv)
 { 
     if(srv->getServerPassword().data() == password)
         _user[id].hasProvidePassword = true;
-    std::cout << _user[id].hasProvidePassword <<  "\n";
+}
+
+bool User::getIfUserIsAuthenticate(int id)
+{
+    return(_user[id].isAuthenticate);
+}
+
+int User::getCredit(int id)
+{
+    return(_user[id].credit);
+}
+
+void User::removeACredit(int id)
+{
+    _user[id].credit--;    
+}
+
+void User::getNameValidity(int id, std::string UserName, std::string userData::*NameType, bool userData::*NameBool)
+{
+    std::string originalName = UserName;
+    int suffix = 0;
+
+    while (true)
+    {
+        bool nameTaken = false;
+        for (size_t i = 0; i < _user.size(); ++i)
+        {
+            if (i != (size_t)id && _user[i].*NameType == UserName)
+            {
+                nameTaken = true;
+                break;
+            }
+        }
+        if (!nameTaken)
+            break;
+
+        ++suffix;
+        std::ostringstream oss;
+        oss << suffix;
+        UserName = originalName + "_" + oss.str();
+    }
+    _user[id].*NameType = UserName;
+    _user[id].*NameBool = true;
 }
