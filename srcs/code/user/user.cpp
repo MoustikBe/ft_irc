@@ -8,6 +8,7 @@ void User::setUsername(std::string name, int fd)
 
 void User::setSocket(int fd)
 {
+    _user[fd].hasProvidePassword = false;
     _user[fd].socketUser = fd;
 }
 
@@ -234,4 +235,16 @@ void User::setPassword(std::string channel, std::string password)
         if(_userChannel[i].channelName.data() == channel)
             _userChannel[i].password = password;
     }
+}
+
+bool User::getIfUserHasPassword(int id)
+{
+    return(_user[id].hasProvidePassword);
+}
+
+void User::getPasswordValidity(int id, std::string password, Server *srv)
+{ 
+    if(srv->getServerPassword().data() == password)
+        _user[id].hasProvidePassword = true;
+    std::cout << _user[id].hasProvidePassword <<  "\n";
 }

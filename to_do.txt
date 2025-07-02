@@ -1,0 +1,64 @@
+Done 
+- User can connect to the server 
+- The server accept multiple connection 
+- The server can manage different request with poll()
+- The server manage private message
+- The server manage channel message 
+- The server manage the command PART
+- The server manage : /KICK /INVITE /TOPIC /MODE (with all different option)
+- User can use /nick to change name 
+
+Not done
+- Need to implement a authentification with password
+- Need to check the availibity of a name before set it 
+- Need to send notification of all the action to all user
+- Need to clean my code and make it more effeciency 
+
+--------------------------------------------------------------------------------------------------------
+
+Subject 
+Done 
+- You are required to develop an IRC server using the C++ 98 standard.
+- You must not develop an IRC client.
+- You must not implement server-to-server communication.
+- Your executable will be run as follows:
+            ./ircserv <port> <password>
+
+- Port: The port number on which your IRC server will be listening for incoming
+            IRC connections
+
+- Password: The connection password. It will be needed by any IRC client that tries
+            to connect to your server.
+
+- The server must be capable of handling multiple clients simultaneously without
+            hanging.
+
+- Forking is prohibited. All I/O operations must be non-blocking
+- Only 1 poll() (or equivalent) can be used for handling all these operations (read,
+            write, but also listen, and so forth).
+
+-  Several IRC clients exist. You have to choose one of them as a reference. Your
+            reference client will be used during the evaluation process
+- Your reference client must be able to connect to your server without encountering any error
+- Communication between client and server has to be done via TCP/IP (v4 or v6).
+- All the messages sent from one client to a channel have to be forwarded to every other client that joined the channel
+- You must have operators and regular users.
+- Then, you have to implement the commands that are specific to channel operators:
+- KICK - Eject a client from the channel
+- INVITE - Invite a client to a channel
+- TOPIC - Change or view the channel topic
+- MODE - Change the channel’s mode: · i: Set/remove Invite-only channel · t: Set/remove the restrictions of the TOPIC command to channel operators · k: Set/remove the channel key (password) o: Give/take channel operator privilege · l: Set/remove the user limit to channel
+
+
+Not done
+- You must be able to authenticate, set a nickname, a username, join a channel, send and receive private messages using your reference client.
+- Of course, you are expected to write a clean code
+- Test example
+# BONUS # 
+- Handle file transfer.
+- A bot
+
+
+Quand j'init un user je lui donne un credit de commande, qui est 1, quand il va faire une requete son credit de commande 
+va tomber a 0 donc on sait que c'est maintenant qu'il devrait avoir la commande pass, on verifie le mot de pass si le mot de passe est correct 
+on le defen

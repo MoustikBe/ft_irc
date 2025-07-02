@@ -19,6 +19,7 @@ struct userData
 {
     int         socketUser;
     bool        online;
+    bool        hasProvidePassword;
     std::string name;
     std::vector<std::string> InChannel;
     std::vector<std::string> OwnerChannel;
@@ -58,6 +59,8 @@ public:
     bool        getIfChannelExist(std::string channel);
     bool        getIfChannelNotFull(std::string channel);
     bool        getIfRequirePassword(std::string channel);
+    bool        getIfUserHasPassword(int id);
+    void        getPasswordValidity(int id, std::string password, Server *srv);
     bool        checkIfPasswordValid(std::string password, std::string channel);
     std::string getUserName(int fd);
 

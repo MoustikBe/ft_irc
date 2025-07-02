@@ -281,7 +281,7 @@ void    requestPart(User *Users, std::string ServerMsg, int fd)
 
 }
 
-void ServerRequest(std::vector<pollfd> &fdPoll, int *i, User *Users)
+void ServerRequest(std::vector<pollfd> &fdPoll, int *i, User *Users, Server *srv)
 {   
     char buffer[1000]= {0};
     int bytes = recv(fdPoll[*i].fd, buffer, sizeof(buffer), 0);
@@ -315,7 +315,7 @@ void ServerRequest(std::vector<pollfd> &fdPoll, int *i, User *Users)
     std::cout << ServerMsg;
 }
 
-void ServerExchange(int serverSocket, std::string welcome)
+void ServerExchange(int serverSocket, std::string welcome, Server *srv)
 {
     int id = 0;
     User Users;
@@ -338,7 +338,7 @@ void ServerExchange(int serverSocket, std::string welcome)
                 if(fdPoll[i].fd == serverSocket)
                     ServerNewConnection(serverSocket, welcome, &fdPoll, &id, &Users);
                 else
-                    ServerRequest(fdPoll, &i, &Users);
+                    ServerRequest(fdPoll, &i, &Users, srv);
             }
         }
 
@@ -355,7 +355,7 @@ void ServerData(sockaddr_in *address, Server srv)
 
 void ServerInit(char **argv)
 {
-    Server srv(atoi(argv[1]));
+    Server srv(atoi(argv[1]), argv[1]);
     sockaddr_in address;
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     int opt = 1;
@@ -364,6 +364,6 @@ void ServerInit(char **argv)
     ServerData(&address, srv);
     bind(serverSocket, (struct sockaddr*)&address, sizeof(address));
     listen(serverSocket, 10);
-    ServerExchange(serverSocket, "001\r\n");
+    ServerExchange(serverSocket, "001\r\n", &srv);
     close(serverSocket);
 }

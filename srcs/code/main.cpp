@@ -9,8 +9,11 @@ void error(std::string ErrorMsg)
 
 bool VerifArguments(char **argv)
 {
-    int port = atoi(argv[1]);
+    int port                = atoi(argv[1]);
+    std::string password    = argv[2];
 
+    if(!password.data())
+        return(std::cout << "\033[0;31mPassword invalid\n", false);
     if(port < 1024 || port > 65535)
         return(std::cout << "\033[0;31mPort invalid\n", false);
     return(true);
