@@ -74,7 +74,6 @@ void User::unsetAdminChannel(int fd, std::string OwnerChannel)
     }
 }
 
-
 void User::setAdminChannel(int fd, std::string OwnerChannel)
 {
     for(int i = 0; i < (int)_user[fd].OwnerChannel.size(); i++)
@@ -160,10 +159,7 @@ void User::setBoolReverse(std::string channel, bool channelStruct::*flag, bool v
     for(int i = 0; i < (int)_userChannel.size(); i++)
     {
         if(_userChannel[i].channelName.data() == channel)
-        {
-            if(_userChannel[i].*flag)
-                _userChannel[i].*flag = val;
-        }
+            _userChannel[i].*flag = val;
     }
 }
 
@@ -209,4 +205,33 @@ bool User::getIfChannelNotFull(std::string channel)
         }
     }
     return(false);
+}
+
+bool User::getIfRequirePassword(std::string channel)
+{
+    for(int i = 0; i < (int)_userChannel.size(); i++)
+    {
+        if(_userChannel[i].channelName.data() == channel)
+            return(_userChannel[i].passwordActive);
+    }
+    return(false);
+}
+
+bool User::checkIfPasswordValid(std::string password, std::string channel)
+{
+    for(int i = 0; i < (int)_userChannel.size(); i++)
+    {
+        if(_userChannel[i].channelName.data() == channel && _userChannel[i].password.data() == password)
+            return(true);
+    }
+    return(false);
+}
+
+void User::setPassword(std::string channel, std::string password)
+{
+    for(int i = 0; i < (int)_userChannel.size(); i++)
+    {
+        if(_userChannel[i].channelName.data() == channel)
+            _userChannel[i].password = password;
+    }
 }

@@ -57,10 +57,19 @@ void requestChanelMessage(User *Users, std::string message, int fd)
 
 void requestJoin(User *Users, std::string JoinMsg, int fd)
 {
-    int index = JoinMsg.find('#');
-    int flag = 0;
+    std::istringstream iss(JoinMsg);
+    std::string command, ChanelName, password;
+    iss >> command >> ChanelName;
 
-    std::string ChanelName = JoinMsg.substr(index + 1, JoinMsg.size() - index - 3);
+    if(ChanelName[0] == '#')
+        ChanelName = ChanelName.substr(1);
+    int flag = 0;
+    if(Users->getIfRequirePassword(ChanelName))
+    {
+        iss >> password;
+        if(!Users->checkIfPasswordValid(password, ChanelName))
+            return; // ERREUR PAS LE BON MDP
+    }
     if(Users->getIfIsOnlyInvitation(ChanelName))
     {
         std::cout << "Channel trouver, et est en invite only\n";
@@ -243,6 +252,33 @@ void  requestMode(User *Users, std::string message, int fd)
             Users->setLimitChannel(channel, atoi(limit.c_str()));
         }
     }
+    else if(flag == "-k" || flag == "+k")
+    {
+        std::string password;
+        iss >> password;
+
+        if(flag == "-k")
+            Users->setBoolReverse(channel, &channelStruct::passwordActive, false);
+        else
+        {
+            Users->setBoolReverse(channel, &channelStruct::passwordActive, true);
+            Users->setPassword(channel, password);
+        }
+    }
+}
+
+void    requestPart(User *Users, std::string ServerMsg, int fd)
+{
+    std::istringstream iss(ServerMsg);
+    std::string command, channel, flag;
+    iss >> command >> channel;
+
+    if(channel[0] == '#')
+        channel = channel.substr(1);
+    std::string fullMsg = ":" + Users->getUserName(fd) + " PART #" + channel + "\r\n";
+    Users->removeChannel(channel, fd);
+    send(fd, fullMsg.c_str(), fullMsg.size(), 0);
+
 }
 
 void ServerRequest(std::vector<pollfd> &fdPoll, int *i, User *Users)
@@ -267,6 +303,8 @@ void ServerRequest(std::vector<pollfd> &fdPoll, int *i, User *Users)
         requestInvite(Users, ServerMsg, fdPoll[*i].fd);
     else if(ServerMsg.substr(0, 4) == "MODE")
         requestMode(Users, ServerMsg, fdPoll[*i].fd);
+    else if(ServerMsg.substr(0, 4) == "PART")
+        requestPart(Users, ServerMsg, fdPoll[*i].fd);
     else if(ServerMsg.substr(0, 4) == "QUIT" || !bytes)
     {
         close(fdPoll[*i].fd);
