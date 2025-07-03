@@ -74,6 +74,8 @@ public:
     bool        checkIfPasswordValid(std::string password, std::string channel);
     std::string getUserName(int fd);
 
+    void        SendMessageForAllUser(std::string channel, std::string message, int id);
+
     void        CreateChannel(std::string channel);
 };
 

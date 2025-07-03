@@ -295,3 +295,16 @@ void User::getNameValidity(int id, std::string UserName, std::string userData::*
     _user[id].*NameType = UserName;
     _user[id].*NameBool = true;
 }
+
+void User::SendMessageForAllUser(std::string channel, std::string message, int id)
+{
+    for (size_t i = 0; i < _user.size(); ++i)
+    {
+        for(size_t j = 0; j < _user[i].InChannel.size(); ++j)
+        {
+            if(_user[i].InChannel[j].data() == channel && (int)i != id)
+                send(i, message.c_str(), message.size(), 0);
+        }
+    }
+    return;
+}

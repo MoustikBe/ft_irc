@@ -93,6 +93,8 @@ void requestJoin(User *Users, std::string JoinMsg, int fd)
         }
         if(Users->getIfChannelNotFull(ChanelName))
         {
+            std::string message = ":" + Users->getUserName(fd) + "!user@localhost PRIVMSG #" + ChanelName + " :has joined the channel\r\n";
+            Users->SendMessageForAllUser(ChanelName, message, fd);
             std::cout << "adding the channnel";
             Users->setChanel(ChanelName, fd);
         }
@@ -144,14 +146,16 @@ void requestTopic(User *Users, std::string message, int fd)
             if(Users->getPrivilege(channel, fd))
             {
                 std::string commandToSend = "TOPIC #" + channel + " :" + Topic + "\r\n";
-                send(fd, commandToSend.c_str(), commandToSend.length(), 0);
+                Users->SendMessageForAllUser(channel, commandToSend, -1);
+                //send(fd, commandToSend.c_str(), commandToSend.length(), 0);
                 Users->setTopicChannel(Topic, currentChannel);
             }
         }
         else
         {
             std::string commandToSend = "TOPIC #" + channel + " :" + Topic + "\r\n";
-            send(fd, commandToSend.c_str(), commandToSend.length(), 0);
+            Users->SendMessageForAllUser(channel, commandToSend, -1);
+            //send(fd, commandToSend.c_str(), commandToSend.length(), 0);
             Users->setTopicChannel(Topic, currentChannel);
         }
     }
@@ -173,14 +177,12 @@ void requestKick(User *Users, std::string message, int fd)
     {
         if(Users->getUserName(i) == nameToKick && Users->getIfUserIsInChannel(channel, i))
         {
-            int socket = Users->getUserFd(i);
             std::string notify = ":" + Users->getUserName(fd) + " KICK #" + channel + " " + nameToKick + " :Kicked from channel\r\n";
-            send(socket, notify.c_str(), notify.length(), 0);
+            Users->SendMessageForAllUser(channel, notify, -1);
             Users->removeChannel(channel, i);
         }
     }
     std::cout << "Command : " << command << "\nChanel : " << channel << "\nnameToKick : " << nameToKick << "\n"; 
-    
 }
 
 void requestInvite(User *Users, std::string message, int fd)
@@ -212,21 +214,34 @@ void  requestMode(User *Users, std::string message, int fd)
         channel = channel.substr(1);
     if(flag == "-i" || flag == "+i")
     {
-        std::string notify = Users->getUserName(fd) + " invitation only restriction has been changed " + channel + "\r\n";
-        send(fd, notify.c_str(), notify.length(), 0);
+        
+        std::string notify = ":" + Users->getUserName(fd) + "!user@localhost NOTICE #" + channel;
         if(flag == "+i")
+        {
+            notify += " in invitation only\r\n";
             Users->setBoolReverse(channel, &channelStruct::InviteOnly, true);
-        else 
+        }
+        else
+        { 
+            notify += " free to join\r\n";
             Users->setBoolReverse(channel, &channelStruct::InviteOnly, false);
+        }
+        Users->SendMessageForAllUser(channel, notify, -1);
     }
     else if(flag == "-t" || flag == "+t")
     {
-        std::string notify = Users->getUserName(fd) + " topic only changed by admin has been changed " + channel + "\r\n";
-        send(fd, notify.c_str(), notify.length(), 0);
+        std::string notify = ":" + Users->getUserName(fd) + "!user@localhost NOTICE #" + channel;
         if(flag == "+t")
+        {
+            notify += " topic can be only changed by admin\r\n";
             Users->setBoolReverse(channel, &channelStruct::TopicActive, true);
+        }
         else
+        {
+            notify += " topic can be changed by everyone\r\n";
             Users->setBoolReverse(channel, &channelStruct::TopicActive, false);
+        }
+        Users->SendMessageForAllUser(channel, notify, -1);
     }
     else if(flag == "-o" || flag == "+o")
     {
@@ -236,34 +251,54 @@ void  requestMode(User *Users, std::string message, int fd)
         int id = Users->getUserIdByName(UserName);
         if(id == -1)
             return; // User not found, error //
+        std::string notify = ":" + Users->getUserName(fd) + "!user@localhost NOTICE #" + channel + " the user : " + Users->getUserName(id);
         if(flag == "+o")
+        {
+            notify += " is an admin now\r\n";
             Users->setAdminChannel(id, channel);
+        }
         else 
+        {
+            notify += "  is no more an admin\r\n";
             Users->unsetAdminChannel(id, channel);
+        }
+        Users->SendMessageForAllUser(channel, notify, -1);
     }
     else if(flag == "-l" || flag == "+l")
     {
+        std::string notify = ":" + Users->getUserName(fd) + "!user@localhost NOTICE #" + channel;
         if(flag == "-l")
+        {
+            notify += " is with unlimited amount of users\r\n";
             Users->setLimitChannel(channel, -1);
+        }
         else
         {
             std::string limit;
             iss >> limit;
+            notify += " has a restriction of " + limit + " of user(s)\r\n";
             Users->setLimitChannel(channel, atoi(limit.c_str()));
         }
+        Users->SendMessageForAllUser(channel, notify, -1);
     }
     else if(flag == "-k" || flag == "+k")
     {
         std::string password;
         iss >> password;
 
+        std::string notify = ":" + Users->getUserName(fd) + "!user@localhost NOTICE #" + channel;
         if(flag == "-k")
+        {
+            notify += " don't need a password for a user his able to connect\r\n";
             Users->setBoolReverse(channel, &channelStruct::passwordActive, false);
+        }
         else
         {
+            notify += " need a password for a user to connect\r\n";
             Users->setBoolReverse(channel, &channelStruct::passwordActive, true);
             Users->setPassword(channel, password);
         }
+        Users->SendMessageForAllUser(channel, notify, -1);
     }
 }
 
@@ -277,8 +312,38 @@ void    requestPart(User *Users, std::string ServerMsg, int fd)
         channel = channel.substr(1);
     std::string fullMsg = ":" + Users->getUserName(fd) + " PART #" + channel + "\r\n";
     Users->removeChannel(channel, fd);
-    send(fd, fullMsg.c_str(), fullMsg.size(), 0);
+    Users->SendMessageForAllUser(channel, fullMsg, fd);
+    //send(fd, fullMsg.c_str(), fullMsg.size(), 0);
 
+}
+
+void requestAuthentification(std::string ServerMsg, User *Users, Server *srv, int id)
+{
+    std::istringstream stream(ServerMsg);
+    std::string line;
+    std::vector<std::string> commands;
+
+    while (std::getline(stream, line)) 
+    {
+        if (!line.empty() && line[line.size() - 1] == '\r')
+            line.erase(line.size() - 1);
+        if (!line.empty())
+            commands.push_back(line);
+    }
+    for(int k = 0; k < (int)commands.size(); k++)
+    {
+        std::istringstream iss(commands[k]);
+        std::string command, option;
+        iss >> command >> option;
+        if(commands[k].substr(0, 4) == "PASS")
+            Users->getPasswordValidity(id, option, srv);
+        if(commands[k].substr(0, 4) == "NICK")
+            Users->getNameValidity(id, option, &userData::name, &userData::hasProvideNickName);
+        if(commands[k].substr(0, 4) == "USER")
+            Users->getNameValidity(id, option, &userData::username, &userData::hasProvideUserName );
+        std::cout << command.data() << "\n";
+    }
+    Users->removeACredit(id); // Faudrait implementer un message d'erreur mais dans tout les cas c'est foutus pour lui sans le mdp //
 }
 
 void ServerRequest(std::vector<pollfd> &fdPoll, int *i, User *Users, Server *srv)
@@ -317,34 +382,7 @@ void ServerRequest(std::vector<pollfd> &fdPoll, int *i, User *Users, Server *srv
         std::cout << ServerMsg;
     }
     else if(Users->getCredit(fdPoll[*i].fd))
-    {
-        std::istringstream stream(ServerMsg);
-        std::string line;
-        std::vector<std::string> commands;
-
-        while (std::getline(stream, line)) 
-        {
-            if (!line.empty() && line[line.size() - 1] == '\r')
-                line.erase(line.size() - 1);
-            if (!line.empty())
-                commands.push_back(line);
-        }
-        for(int k = 0; k < (int)commands.size(); k++)
-        {
-            
-            std::istringstream iss(commands[k]);
-            std::string command, option;
-            iss >> command >> option;
-            if(commands[k].substr(0, 4) == "PASS")
-                Users->getPasswordValidity(fdPoll[*i].fd, option, srv);
-            if(commands[k].substr(0, 4) == "NICK")
-                Users->getNameValidity(fdPoll[*i].fd, option, &userData::name, &userData::hasProvideNickName);
-            if(commands[k].substr(0, 4) == "USER")
-                Users->getNameValidity(fdPoll[*i].fd, option, &userData::username, &userData::hasProvideUserName );
-            std::cout << command.data() << "\n";
-        }
-        Users->removeACredit(fdPoll[*i].fd); // Faudrait implementer un message d'erreur mais dans tout les cas c'est foutus pour lui sans le mdp //
-    }
+        requestAuthentification(ServerMsg, Users, srv, fdPoll[*i].fd);
     else
     {
         close(fdPoll[*i].fd);

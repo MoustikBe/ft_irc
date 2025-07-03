@@ -9,12 +9,13 @@ Done
 - User can use /nick to change name 
 - Need to implement a authentification with password
 - Need to check the availibity of a name before set it 
+- Regler les problemes lier au faites que un utilisateur parte mais ses data reste dans le USERS[]
 
 Not done
-- La commande leave
 - Need to send notification of all the action to all user
+- Ameliorer le parsing
 - Need to clean my code and make it more effeciency 
-- Regler les problemes lier au faites que un utilisateur parte mes ses data reste dans le USERS[]
+
 --------------------------------------------------------------------------------------------------------
 
 Subject 
@@ -49,17 +50,22 @@ Done
 - INVITE - Invite a client to a channel
 - TOPIC - Change or view the channel topic
 - MODE - Change the channel’s mode: · i: Set/remove Invite-only channel · t: Set/remove the restrictions of the TOPIC command to channel operators · k: Set/remove the channel key (password) o: Give/take channel operator privilege · l: Set/remove the user limit to channel
+- You must be able to authenticate, set a nickname, a username, join a channel, send and receive private messages using your reference client.
 
 
 Not done
-- You must be able to authenticate, set a nickname, a username, join a channel, send and receive private messages using your reference client.
 - Of course, you are expected to write a clean code
-- Test example
+
+(- Test example)
 # BONUS # 
 - Handle file transfer.
 - A bot
 
 
-Quand j'init un user je lui donne un credit de commande, qui est 1, quand il va faire une requete son credit de commande 
-va tomber a 0 donc on sait que c'est maintenant qu'il devrait avoir la commande pass, on verifie le mot de pass si le mot de passe est correct 
-on le defen
+//// AJD ////
+----- obliger -----
+- clean un peut le code, le rend plus lisible +/-
+- Implementer une fonction qui envoyer un std::string message a tous les utilisateur de l'objet USERS
+----- Facultatif -----
+- Ameliorer le parsing
+- Faire une optimisation complete du code
