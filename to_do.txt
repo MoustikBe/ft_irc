@@ -10,10 +10,10 @@ Done
 - Need to implement a authentification with password
 - Need to check the availibity of a name before set it 
 - Regler les problemes lier au faites que un utilisateur parte mais ses data reste dans le USERS[]
+- Need to send notification of all the action to all user
 
 Not done
-- Need to send notification of all the action to all user
-- Ameliorer le parsing
+- Ameliorer le parsing et les notifications au utilisateur
 - Need to clean my code and make it more effeciency 
 
 --------------------------------------------------------------------------------------------------------
@@ -61,11 +61,3 @@ Not done
 - Handle file transfer.
 - A bot
 
-
-//// AJD ////
------ obliger -----
-- clean un peut le code, le rend plus lisible +/-
-- Implementer une fonction qui envoyer un std::string message a tous les utilisateur de l'objet USERS
------ Facultatif -----
-- Ameliorer le parsing
-- Faire une optimisation complete du code
