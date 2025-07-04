@@ -115,6 +115,7 @@ void requestJoin(User *Users, std::string JoinMsg, int fd)
         if(!flag)
         {
             std::cout << "L'utilisateur : " << Users->getUserName(fd) << " est devenus admin de " << ChanelName << "\n";
+            Users->SendNotification(fd, "#" + ChanelName + " New channel created. You are the admin of the channel. \r\n");
             Users->setAdminChannel(fd, ChanelName);
             Users->CreateChannel(ChanelName);
         }
@@ -131,6 +132,7 @@ void requestJoin(User *Users, std::string JoinMsg, int fd)
 
 void requestMessage(User *Users, std::string message, int fd)
 {
+    bool UserFound = false;
     std::string SendTo;
     int index = message.find(":");
     if(IsChanel(message))
@@ -149,8 +151,11 @@ void requestMessage(User *Users, std::string message, int fd)
             std::string MessageTo = ":" + Users->getUserName(fd) + "!user@localhost PRIVMSG #" + message.substr(7, index - 7) + "\r\n";
             send(fd, MessageFrom.c_str(), MessageFrom.size(), 0);
             send(Users->getUserFd(i), MessageTo.c_str(), MessageTo.size(), 0);
+            UserFound = true;
         } 
     }
+    if(!UserFound)
+        Users->SendNotification(fd, "WARNING User not found. \r\n");
 }
 
 void requestTopic(User *Users, std::string message, int fd)
@@ -176,6 +181,8 @@ void requestTopic(User *Users, std::string message, int fd)
                 //send(fd, commandToSend.c_str(), commandToSend.length(), 0);
                 Users->setTopicChannel(Topic, currentChannel);
             }
+            else 
+                Users->SendNotification(fd, "#" + channel + " You must be admin of the channel to do that. \r\n");
         }
         else
         {

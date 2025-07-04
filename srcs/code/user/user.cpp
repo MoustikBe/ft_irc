@@ -260,6 +260,9 @@ bool User::getIfhasHabilitation(int id)
         if(_user[id].accessRequest == 0)
         {
             SendNotification(id, "INFO, Connection to the server succeeded.\r\n");
+            SendNotification(id, "INFO, Your default User Name -> " + _user[id].username + "\r\n");
+            SendNotification(id, "INFO, Your default Nick Name -> " + _user[id].name + "\r\n");
+            SendNotification(id, "INFO, If you want to change them use /USER [new_name] /NICK [new_name] \r\n");
             _user[id].accessRequest++;
         }
         return(true); 
@@ -314,6 +317,8 @@ void User::getNameValidity(int id, std::string UserName, std::string userData::*
     }
     _user[id].*NameType = UserName;
     _user[id].*NameBool = true;
+    if(getIfhasHabilitation(id))
+        SendNotification(id, "WARNING New USER/NICK name is -> " + _user[id].name + "\r\n");
 }
 
 void User::SendMessageForAllUser(std::string channel, std::string message, int id)
