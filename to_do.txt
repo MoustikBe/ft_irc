@@ -55,7 +55,7 @@ Done
 
 Not done
 - Of course, you are expected to write a clean code
-
+- Implement /USER
 (- Test example)
 # BONUS # 
 - Handle file transfer.

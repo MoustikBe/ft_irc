@@ -26,8 +26,19 @@
 #include "server.hpp"
 #include "user.hpp"
 
-/* Server */
-void ServerInit(char **argv);
+/* Server Main */
+void    ServerInit(char **argv);
+bool    IsChanel(std::string message);
+/* Server_command.cpp*/
+void    requestJoin(User *Users, std::string JoinMsg, int fd);
+void    requestInvite(User *Users, std::string message, int fd);
+void    requestChangeName(int fd, std::string ServerMsg, User *Users);
+void    requestChanelMessage(User *Users, std::string message, int fd);
+void    requestPart(User *Users, std::string ServerMsg, int fd);
+void    requestMode(User *Users, std::string message, int fd);
+void    requestKick(User *Users, std::string message, int fd);
+void    requestTopic(User *Users, std::string message, int fd);
+void    requestMessage(User *Users, std::string message, int fd);
 
 /* Main */
 void error(std::string ErrorMsg);
