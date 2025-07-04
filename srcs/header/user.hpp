@@ -25,6 +25,7 @@ struct userData
     bool        hasProvideUserName;
     bool        hasHabilitation;
     bool        isAuthenticate;
+    int         accessRequest;
     std::string name;
     std::string username;
     std::vector<std::string> InChannel;
@@ -49,7 +50,7 @@ public:
     void        setChanel(std::string ChanelName, int fd);
     void        setTopicChannel(std::string Topic, int currentChannel);
     void        setInvitationChannel(std::string Invitation, int id);
-    void        setBoolReverse(std::string channel, bool channelStruct::*flag, bool val);
+    void        setBoolReverse(std::string channel, bool channelStruct::*flag, bool val, std::string message);
     void        setLimitChannel(std::string channel, int nb);
     void        setPassword(std::string channel, std::string password);
     void        removeACredit(int id);
@@ -73,6 +74,8 @@ public:
     void        getNameValidity(int id, std::string option, std::string userData::*NameType, bool userData::*NameBool);
     bool        checkIfPasswordValid(std::string password, std::string channel);
     std::string getUserName(int fd);
+
+    void        SendNotification(int id, std::string message);
 
     void        SendMessageForAllUser(std::string channel, std::string message, int id);
 

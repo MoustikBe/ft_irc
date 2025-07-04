@@ -46,7 +46,10 @@ int User::getUserFd(int id)
 
 void User::setChanel(std::string ChanelName, int fd)
 {
+    std::string message = ":" + getUserName(fd) + "!user@localhost PRIVMSG #" + ChanelName + " :has joined the channel\r\n";
+    
     _user[fd].InChannel.push_back(ChanelName);
+    SendMessageForAllUser(ChanelName, message, fd);
 }
 
 bool User::getIfUserIsInChannel(std::string channelName, int id)
@@ -90,10 +93,14 @@ void User::setAdminChannel(int fd, std::string OwnerChannel)
 
 void User::removeChannel(std::string channel, int id)
 {
+    std::string fullMsg = ":" + getUserName(id) + " PART #" + channel + "\r\n";
     for(int i = 0; i < (int)_user[id].InChannel.size(); i++)
     {
         if(_user[id].InChannel[i].data() == channel)
+        {
+            SendMessageForAllUser(channel, fullMsg, id);
             _user[id].InChannel.erase(_user[id].InChannel.begin() + i);
+        }
     }
 }
 
@@ -158,13 +165,18 @@ bool User::getIfChannelInvitation(std::string channel, int id)
     return false;
 }
 
-void User::setBoolReverse(std::string channel, bool channelStruct::*flag, bool val)
+void User::setBoolReverse(std::string channel, bool channelStruct::*flag, bool val, std::string message)
 {
     for(int i = 0; i < (int)_userChannel.size(); i++)
     {
         if(_userChannel[i].channelName.data() == channel)
+        {
+            if(_userChannel[i].*flag == val)
+                return ;
             _userChannel[i].*flag = val;
+        }
     }
+    SendMessageForAllUser(channel, message, -1);
 }
 
 void User::CreateChannel(std::string channel)
@@ -199,7 +211,7 @@ bool User::getIfChannelNotFull(std::string channel)
     {
         if(_userChannel[i].channelName.data() == channel)
         {
-            if(_userChannel[i].actualUser > _userChannel[i].maxUser && _userChannel[i].maxUser != -1)
+            if(_userChannel[i].actualUser >= _userChannel[i].maxUser && _userChannel[i].maxUser != -1)
                 return(false);
             else
             {
@@ -242,8 +254,16 @@ void User::setPassword(std::string channel, std::string password)
 
 bool User::getIfhasHabilitation(int id)
 {
+    
     if(_user[id].hasProvidePassword && _user[id].hasProvideNickName &&_user[id].hasProvideUserName)
+    {
+        if(_user[id].accessRequest == 0)
+        {
+            SendNotification(id, "INFO, Connection to the server succeeded.\r\n");
+            _user[id].accessRequest++;
+        }
         return(true); 
+    }
     return(false);
 }
 
@@ -307,4 +327,10 @@ void User::SendMessageForAllUser(std::string channel, std::string message, int i
         }
     }
     return;
+}
+
+void User::SendNotification(int id, std::string message)
+{
+    std::string notify = ":" + getUserName(id) + "!user@localhost NOTICE " + message;
+    send(id, notify.c_str(), notify.size(), 0);
 }

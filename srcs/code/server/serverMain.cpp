@@ -1,12 +1,31 @@
 #include "../../header/mainHeader.hpp"
 
-void ServerNewConnection(int serverSocket, std::string welcome, std::vector<pollfd> *fdPoll, int *id, User *Users)
+void ServerNewConnection(int serverSocket, std::vector<pollfd> *fdPoll, int *id, User *Users)
 {
     int clientFd = accept(serverSocket, NULL, NULL);
+    if (clientFd == -1) 
+    {
+        perror("accept");
+        return;
+    }
+    int flags = fcntl(clientFd, F_GETFL, 0);
+    if (flags == -1) 
+    {
+        perror("fcntl F_GETFL");
+        close(clientFd);
+        return;
+    }
+    if (fcntl(clientFd, F_SETFL, flags | O_NONBLOCK) == -1) 
+    {
+        perror("fcntl F_SETFL");
+        close(clientFd);
+        return;
+    }
     std::cout << "Nouvelle connection\n";
     
+    std::string connection = "001\r\n";
     Users->setSocket(clientFd);
-    send(clientFd, welcome.c_str(), welcome.size(), 0);
+    send(clientFd, connection.c_str(), connection.size(), 0);
     pollfd newClient = {clientFd, POLLIN, 0};
     fdPoll->push_back(newClient);
     (*id)++;
@@ -68,7 +87,10 @@ void requestJoin(User *Users, std::string JoinMsg, int fd)
     {
         iss >> password;
         if(!Users->checkIfPasswordValid(password, ChanelName))
-            return; // ERREUR PAS LE BON MDP
+        {
+            Users->SendNotification(fd, "#" + ChanelName + " this channel need a valid password.\r\n");
+            return ;
+        }
     }
     if(Users->getIfIsOnlyInvitation(ChanelName))
     {
@@ -77,9 +99,14 @@ void requestJoin(User *Users, std::string JoinMsg, int fd)
         {
             if(Users->getIfChannelNotFull(ChanelName))
                 Users->setChanel(ChanelName, fd);
+            else
+                Users->SendNotification(fd, "#" + ChanelName + " Channel is full\r\n");
         }
         else
+        {
+            Users->SendNotification(fd, "#" + ChanelName + " this channel is in invitation only and you didn't get invited.\r\n");
             std::cout << "Tu n'as le channel dans la liste de channel qui ton inviter\n";
+        }
     }
     else
     {
@@ -94,12 +121,11 @@ void requestJoin(User *Users, std::string JoinMsg, int fd)
         if(Users->getIfChannelNotFull(ChanelName))
         {
             std::string message = ":" + Users->getUserName(fd) + "!user@localhost PRIVMSG #" + ChanelName + " :has joined the channel\r\n";
-            Users->SendMessageForAllUser(ChanelName, message, fd);
             std::cout << "adding the channnel";
             Users->setChanel(ChanelName, fd);
         }
-        else 
-            std::cout << "C'est full";
+        else
+            Users->SendNotification(fd, "#" + ChanelName + " Channel is full\r\n");
     }
 }
 
@@ -197,7 +223,7 @@ void requestInvite(User *Users, std::string message, int fd)
     {
         if(Users->getUserName(i) == nameToInvite)
         {
-            std::string notify = Users->getUserName(fd) + " invited you to join " + channel + "\r\n";
+            std::string notify = ":" + Users->getUserName(fd) + "!user@localhost NOTICE WARNING " + Users->getUserName(fd) + " Invite you to the channel " + channel + "\r\n";
             send(i, notify.c_str(), notify.length(), 0);
             Users->setInvitationChannel(channel, i);
         }
@@ -219,14 +245,13 @@ void  requestMode(User *Users, std::string message, int fd)
         if(flag == "+i")
         {
             notify += " in invitation only\r\n";
-            Users->setBoolReverse(channel, &channelStruct::InviteOnly, true);
+            Users->setBoolReverse(channel, &channelStruct::InviteOnly, true, notify);
         }
         else
         { 
             notify += " free to join\r\n";
-            Users->setBoolReverse(channel, &channelStruct::InviteOnly, false);
+            Users->setBoolReverse(channel, &channelStruct::InviteOnly, false, notify);
         }
-        Users->SendMessageForAllUser(channel, notify, -1);
     }
     else if(flag == "-t" || flag == "+t")
     {
@@ -234,14 +259,13 @@ void  requestMode(User *Users, std::string message, int fd)
         if(flag == "+t")
         {
             notify += " topic can be only changed by admin\r\n";
-            Users->setBoolReverse(channel, &channelStruct::TopicActive, true);
+            Users->setBoolReverse(channel, &channelStruct::TopicActive, true, notify);
         }
         else
         {
             notify += " topic can be changed by everyone\r\n";
-            Users->setBoolReverse(channel, &channelStruct::TopicActive, false);
+            Users->setBoolReverse(channel, &channelStruct::TopicActive, false, notify);
         }
-        Users->SendMessageForAllUser(channel, notify, -1);
     }
     else if(flag == "-o" || flag == "+o")
     {
@@ -290,15 +314,14 @@ void  requestMode(User *Users, std::string message, int fd)
         if(flag == "-k")
         {
             notify += " don't need a password for a user his able to connect\r\n";
-            Users->setBoolReverse(channel, &channelStruct::passwordActive, false);
+            Users->setBoolReverse(channel, &channelStruct::passwordActive, false, notify);
         }
         else
         {
             notify += " need a password for a user to connect\r\n";
-            Users->setBoolReverse(channel, &channelStruct::passwordActive, true);
+            Users->setBoolReverse(channel, &channelStruct::passwordActive, true, notify);
             Users->setPassword(channel, password);
         }
-        Users->SendMessageForAllUser(channel, notify, -1);
     }
 }
 
@@ -310,11 +333,7 @@ void    requestPart(User *Users, std::string ServerMsg, int fd)
 
     if(channel[0] == '#')
         channel = channel.substr(1);
-    std::string fullMsg = ":" + Users->getUserName(fd) + " PART #" + channel + "\r\n";
     Users->removeChannel(channel, fd);
-    Users->SendMessageForAllUser(channel, fullMsg, fd);
-    //send(fd, fullMsg.c_str(), fullMsg.size(), 0);
-
 }
 
 void requestAuthentification(std::string ServerMsg, User *Users, Server *srv, int id)
@@ -385,13 +404,14 @@ void ServerRequest(std::vector<pollfd> &fdPoll, int *i, User *Users, Server *srv
         requestAuthentification(ServerMsg, Users, srv, fdPoll[*i].fd);
     else
     {
+        Users->SendNotification(fdPoll[*i].fd, "WARNING Wrong password\r\n");
         close(fdPoll[*i].fd);
         fdPoll.erase(fdPoll.begin() + *i);
-        std::cout << "Connection refused, password issue\n";    
+        std::cout << "Connection refused, password issue\n";
         (*i)--;
     }
 }
-void ServerExchange(int serverSocket, std::string welcome, Server *srv)
+void ServerExchange(int serverSocket, Server *srv)
 {
     int id = 0;
     User Users;
@@ -412,7 +432,7 @@ void ServerExchange(int serverSocket, std::string welcome, Server *srv)
             if(fdPoll[i].revents & POLLIN)
             {
                 if(fdPoll[i].fd == serverSocket)
-                    ServerNewConnection(serverSocket, welcome, &fdPoll, &id, &Users);
+                    ServerNewConnection(serverSocket, &fdPoll, &id, &Users);
                 else
                     ServerRequest(fdPoll, &i, &Users, srv);
             }
@@ -440,6 +460,6 @@ void ServerInit(char **argv)
     ServerData(&address, srv);
     bind(serverSocket, (struct sockaddr*)&address, sizeof(address));
     listen(serverSocket, 10);
-    ServerExchange(serverSocket, "001\r\n", &srv);
+    ServerExchange(serverSocket, &srv);
     close(serverSocket);
 }
