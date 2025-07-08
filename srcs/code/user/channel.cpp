@@ -43,5 +43,5 @@ void User::getNameValidity(int id, std::string UserName, std::string userData::*
     _user[id].*NameType = UserName;
     _user[id].*NameBool = true;
     if(getIfhasHabilitation(id))
-        SendNotification(id, "WARNING New USER/NICK name is -> " + _user[id].name + "\r\n");
+        SendNotification(id, "WARNING New USER or NICK name is -> " + _user[id].*NameType + "\r\n");
 }

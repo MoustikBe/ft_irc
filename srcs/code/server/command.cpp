@@ -6,6 +6,12 @@ void requestChangeName(int fd, std::string ServerMsg, User *Users)
     Users->getNameValidity(fd, newName, &userData::name, &userData::hasProvideNickName);
 }
 
+void requestChangeUserName(int fd, std::string ServerMsg, User *Users)
+{
+    std::string newName = ServerMsg.substr(9, ServerMsg.size() - 11);
+    Users->getNameValidity(fd, newName, &userData::username, &userData::hasProvideUserName);
+}
+
 void    requestPart(User *Users, std::string ServerMsg, int fd)
 {
     std::istringstream iss(ServerMsg);
