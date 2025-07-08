@@ -17,7 +17,7 @@ void ServerRequest(std::vector<pollfd> &fdPoll, int *i, User *Users, Server *srv
     if(Users->getIfhasHabilitation(fdPoll[*i].fd))
     {
         if(ServerMsg.substr(0, 4) == "info")
-            Users->getAllDataUser();
+            Users->getAllDataUser(fdPoll[*i].fd);
         else if(ServerMsg.substr(0, 4) == "NICK")
             requestChangeName(fdPoll[*i].fd, ServerMsg, Users);
         else if(ServerMsg.substr(0, 8) == "userhost")

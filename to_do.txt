@@ -11,10 +11,10 @@ Done
 - Need to check the availibity of a name before set it 
 - Regler les problemes lier au faites que un utilisateur parte mais ses data reste dans le USERS[]
 - Need to send notification of all the action to all user
-
-Not done
 - Ameliorer le parsing et les notifications au utilisateur
 - Need to clean my code and make it more effeciency 
+
+Not done
 
 --------------------------------------------------------------------------------------------------------
 
@@ -51,11 +51,11 @@ Done
 - TOPIC - Change or view the channel topic
 - MODE - Change the channel’s mode: · i: Set/remove Invite-only channel · t: Set/remove the restrictions of the TOPIC command to channel operators · k: Set/remove the channel key (password) o: Give/take channel operator privilege · l: Set/remove the user limit to channel
 - You must be able to authenticate, set a nickname, a username, join a channel, send and receive private messages using your reference client.
+- Of course, you are expected to write a clean code
+- Implement /USER
 
 
 Not done
-- Of course, you are expected to write a clean code
-- Implement /USER
 (- Test example)
 # BONUS # 
 - Handle file transfer.

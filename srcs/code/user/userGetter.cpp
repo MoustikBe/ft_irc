@@ -23,17 +23,30 @@ int User::getLen()
     return(count);
 }
 
-void User::getAllDataUser()
+void User::getAllUserChannel(int id, const std::string& header, const std::vector<std::string>& channels)
 {
-    /* Faut la recoder je penses */
-    std::cout << "--------------\n";
-    for(int i = 0; i < (int)_user.size(); i++)
+    std::string message = header + "\r\n";
+    for (size_t i = 0; i < channels.size(); ++i)
     {
-        if(_user[i].name != "")
-            std::cout << _user[i].name << "\n";
+        message += "- " + channels[i] + "\r\n";
     }
-    std::cout << "--------------\n";
+    send(id, message.c_str(), message.size(), 0);
 }
+
+void User::getAllDataUser(int id)
+{
+    std::string allInfo =
+        ":" + getUserName(id) + "!user@localhost NOTICE #" + "INFO :\r\n"
+        "---------- BOT INFO ----------\r\n"
+        "UserName : " + _user[id].username + "\r\n"
+        "NickName : " + _user[id].name + "\r\n";
+    send(id, allInfo.c_str(), allInfo.size(), 0);
+
+    getAllUserChannel(id, "\nChannels you are in :", _user[id].InChannel);
+    getAllUserChannel(id, "\nChannels you own :", _user[id].OwnerChannel);
+    getAllUserChannel(id, "\nChannels you are invited to :", _user[id].invitedChannel);
+}
+
 
 int User::getUserIdByName(std::string UserName)
 {

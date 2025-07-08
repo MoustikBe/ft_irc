@@ -56,6 +56,8 @@ public:
     bool        getIfRequirePassword(std::string channel);
     bool        getIfIsOnlyInvitation(std::string channel);
     void        getPasswordValidity(int id, std::string password, Server *srv);
+    
+    void        getAllUserChannel(int id, const std::string& header, const std::vector<std::string>& channels);
 
     /* user/channelSetter.cpp */
     void        setLimitChannel(std::string channel, int nb);
@@ -75,10 +77,10 @@ public:
 
     /* user/userGetter.cpp */
     int         getLen();
-    void        getAllDataUser();
     int         getCredit(int id);
     int         getUserFd(int id);
     std::string getUserName(int fd);
+    void        getAllDataUser(int id);
     bool        getChannelTopicStatus(int index);
     int         getUserIdByName(std::string name);
 
