@@ -41,6 +41,8 @@ private:
 
 public:
     User(){};
+    User(const User &other) : _user(other._user), _userChannel(other._userChannel){};
+    inline User& operator=(const User &other) {if(this != &other){_user=other._user;_userChannel=other._userChannel;}return(*this);};
     ~User(){};
     
     /* user/channel.cpp */
