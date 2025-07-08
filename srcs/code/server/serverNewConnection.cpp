@@ -8,21 +8,13 @@ void ServerNewConnection(int serverSocket, std::vector<pollfd> *fdPoll, int *id,
         perror("accept");
         return;
     }
-    int flags = fcntl(clientFd, F_GETFL, 0);
-    if (flags == -1) 
-    {
-        perror("fcntl F_GETFL");
-        close(clientFd);
-        return;
-    }
-    if (fcntl(clientFd, F_SETFL, flags | O_NONBLOCK) == -1) 
+    if (fcntl(clientFd, F_SETFL, O_NONBLOCK) == -1)
     {
         perror("fcntl F_SETFL");
         close(clientFd);
         return;
-    }
+    }    
     std::cout << "Nouvelle connection\n";
-    
     std::string connection = "001\r\n";
     Users->setSocket(clientFd);
     send(clientFd, connection.c_str(), connection.size(), 0);
