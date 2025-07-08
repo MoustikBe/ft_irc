@@ -3,7 +3,10 @@ C+	    = c++
 CFLAG   = -Wall -Werror -Wextra -std=c++98 -g3
 RM      = rm -rf
 OBJDIR  = obj
-SOURCES = srcs/code/main.cpp srcs/code/server/serverMain.cpp srcs/code/server/command.cpp srcs/code/user/user.cpp
+SOURCES = srcs/code/main.cpp \
+		  srcs/code/server/serverMain.cpp srcs/code/server/command.cpp \
+		  srcs/code/user/user.cpp srcs/code/user/userSetter.cpp srcs/code/user/userAdminChannel.cpp srcs/code/user/userInvitedChannel.cpp srcs/code/user/userInChannel.cpp srcs/code/user/userGetter.cpp \
+		  srcs/code/user/channel.cpp srcs/code/user/channelGetter.cpp srcs/code/user/channelSetter.cpp
 
 OBJECTS = $(SOURCES:%.cpp=$(OBJDIR)/%.o)
 

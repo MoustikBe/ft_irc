@@ -42,44 +42,60 @@ private:
 public:
     User(){};
     ~User(){};
-    void        removeChannel(std::string channel, int id);
-    void        setUsername(std::string name, int id);
-    void        setSocket(int fd);
-    void        setAdminChannel(int fd, std::string OwnerChannel);
-    void        unsetAdminChannel(int fd, std::string OwnerChannel);
-    void        setChanel(std::string ChanelName, int fd);
-    void        setTopicChannel(std::string Topic, int currentChannel);
-    void        setInvitationChannel(std::string Invitation, int id);
-    void        setBoolReverse(std::string channel, bool channelStruct::*flag, bool val, std::string message);
-    void        setLimitChannel(std::string channel, int nb);
-    void        setPassword(std::string channel, std::string password);
-    void        removeACredit(int id);
-    int         getLen();
-    void        getAllDataUser();
-    int         getUserFd(int id);
-    int         getUserIdByName(std::string name);
-    bool        getIfUserIsInChannel(std::string channelName, int id);
-    bool        getPrivilege(std::string channel, int id);
-    int         getChannelIndex(std::string channel);
-    int         getCredit(int id);
-    bool        getChannelTopicStatus(int index);
-    bool        getIfIsOnlyInvitation(std::string channel);
-    bool        getIfChannelInvitation(std::string channel, int id);
+    
+    /* user/channel.cpp */
+    void        CreateChannel(std::string channel);
+    bool        checkIfPasswordValid(std::string password, std::string channel);
+    void        getNameValidity(int id, std::string option, std::string userData::*NameType, bool userData::*NameBool);
+
+    /* user/channelGetter.cpp */
+    bool        getIfhasHabilitation(int id);
+    int         getChannelId(std::string channel);
     bool        getIfChannelExist(std::string channel);
     bool        getIfChannelNotFull(std::string channel);
     bool        getIfRequirePassword(std::string channel);
-    bool        getIfhasHabilitation(int id);
-    bool        getIfUserIsAuthenticate(int id);
+    bool        getIfIsOnlyInvitation(std::string channel);
     void        getPasswordValidity(int id, std::string password, Server *srv);
-    void        getNameValidity(int id, std::string option, std::string userData::*NameType, bool userData::*NameBool);
-    bool        checkIfPasswordValid(std::string password, std::string channel);
-    std::string getUserName(int fd);
 
+    /* user/channelSetter.cpp */
+    void        setLimitChannel(std::string channel, int nb);
+    void        setTopicChannel(std::string Topic, int currentChannel);
+    void        setPassword(std::string channel, std::string password);
+    void        setBoolReverse(std::string channel, bool channelStruct::*flag, bool val, std::string message);
+
+    /* user/user.cpp */
     void        SendNotification(int id, std::string message);
-
     void        SendMessageForAllUser(std::string channel, std::string message, int id);
+    int         getUserChannelId(const std::vector<std::string>& channels, const std::string& channelName);
 
-    void        CreateChannel(std::string channel);
+    /* user/userAdmin.cpp */
+    bool        getPrivilege(std::string channel, int id);
+    void        setAdminChannel(int fd, std::string OwnerChannel);
+    void        unsetAdminChannel(int fd, std::string OwnerChannel);
+
+    /* user/userGetter.cpp */
+    int         getLen();
+    void        getAllDataUser();
+    int         getCredit(int id);
+    int         getUserFd(int id);
+    std::string getUserName(int fd);
+    bool        getChannelTopicStatus(int index);
+    int         getUserIdByName(std::string name);
+
+    /* user/userInChannel.cpp */
+    void        setChanel(std::string ChanelName, int fd);
+    void        removeChannel(std::string channel, int id);
+    bool        getIfUserIsInChannel(std::string channelName, int id);
+
+    /* user/userInvitedChannel.cpp */
+    bool        getIfChannelInvitation(std::string channel, int id);
+    void        setInvitationChannel(std::string Invitation, int id);
+
+    /* user/userSetter.cpp */
+    void        setSocket(int fd);
+    void        removeACredit(int id);
+    void        setUsername(std::string name, int id);
+
 };
 
 #endif

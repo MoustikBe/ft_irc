@@ -1,6 +1,5 @@
 #include "../header/mainHeader.hpp"
 
-
 void error(std::string ErrorMsg)
 {
     std::cout << ErrorMsg << "\n";

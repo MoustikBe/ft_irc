@@ -118,7 +118,7 @@ void requestTopic(User *Users, std::string message, int fd)
         channel = channel.substr(1);
     if(Topic[0] == ':')
         Topic = Topic.substr(1);
-    int currentChannel = Users->getChannelIndex(channel);
+    int currentChannel = Users->getChannelId(channel);
     std::cout << "current -> " << currentChannel << "\nChannel " << channel; 
     if(currentChannel != -1)
     {
@@ -235,7 +235,7 @@ void  requestMode(User *Users, std::string message, int fd)
 
         int id = Users->getUserIdByName(UserName);
         if(id == -1)
-            return; // User not found, error //
+            return;
         std::string notify = ":" + Users->getUserName(fd) + "!user@localhost NOTICE #" + channel + " the user : " + Users->getUserName(id);
         if(flag == "+o")
         {
